@@ -14,7 +14,7 @@ export default function CustomNode(props: NodeProps) {
 
       {Object.entries(data.meta).map(([k, v]) => (
         <div key={k} className="text-xs">
-          {k}: {v}
+          {k}: {Array.isArray(v) ? v.join(', ') : String(v)}
         </div>
       ))}
 
