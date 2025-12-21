@@ -20,7 +20,9 @@ export default function CreateNodeModal({ onClose, onSubmit }: CreateNodeModalPr
     setValueInput('')
   }
 
-  const submit = () => {
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault() // stop page reload
+
     onSubmit({
       label,
       kind,
@@ -30,11 +32,15 @@ export default function CreateNodeModal({ onClose, onSubmit }: CreateNodeModalPr
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
-      <div className="bg-background rounded p-4 space-y-4">
+      <form
+        onSubmit={submit}
+        className="bg-background rounded p-4 space-y-4"
+      >
         <h2 className="font-semibold text-lg">Create Node</h2>
 
         {/* Label */}
         <input
+          required
           className="w-full px-2 py-1 border rounded"
           placeholder="Label"
           value={label}
@@ -43,6 +49,7 @@ export default function CreateNodeModal({ onClose, onSubmit }: CreateNodeModalPr
 
         {/* Kind */}
         <input
+          required
           className="w-full px-2 py-1 border rounded"
           placeholder="Kind (db, app, cache...)"
           value={kind}
@@ -64,6 +71,7 @@ export default function CreateNodeModal({ onClose, onSubmit }: CreateNodeModalPr
             onChange={(e) => setValueInput(e.target.value)}
           />
           <button
+            type="button"
             onClick={addMeta}
             className="px-2 rounded bg-gray-700 text-white cursor-pointer"
           >
@@ -84,17 +92,21 @@ export default function CreateNodeModal({ onClose, onSubmit }: CreateNodeModalPr
 
         {/* Actions */}
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-3 py-1 border rounded cursor-pointer">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-3 py-1 border rounded cursor-pointer"
+          >
             Cancel
           </button>
           <button
-            onClick={submit}
+            type="submit"
             className="px-3 py-1 rounded bg-amber-500 text-black cursor-pointer"
           >
             Create
           </button>
         </div>
-      </div>
+      </form>
     </div>
   )
 }
