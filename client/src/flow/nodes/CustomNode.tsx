@@ -1,23 +1,35 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react'
-import type { CustomNodeData } from '../../types/NodeTypes'
+import type { FlowNode } from '../../types/NodeTypes'
+import { renderMeta } from '../../utils/formatMetaVal'
 
-export default function CustomNode(props: NodeProps) {
-  const data = props.data as CustomNodeData
-  const selected=props.selected;
+export default function CustomNode(props: NodeProps<FlowNode>) {
+  const { data, selected } = props
+  const highlighted = (props as any).highlighted
 
   return (
-    <div className={`px-4 py-2 rounded border bg-background text-sm
-    ${selected ? 'border-secondary ring-2 ring-secondary' : 'border-gray-600'}
-  `}>
+    <div
+      className={`px-4 py-2 rounded border bg-background text-sm
+        ${selected || highlighted
+          ? 'border-secondary ring-2 ring-secondary'
+          : 'border-gray-600'
+        }
+      `}
+    >
       <div className="font-semibold">{data.label}</div>
       <div className="text-xs opacity-70">{data.kind}</div>
 
+<<<<<<< HEAD
       {Object.entries(data.meta).map(([k, v]) => (
         <div key={k} className="text-xs">
           {k}: {Array.isArray(v) ? v.join(', ') : String(v)}
         </div>
       ))}
 
+=======
+      <pre className="mt-2 text-xs font-mono whitespace-pre">
+        {renderMeta(data.meta)}
+      </pre>
+>>>>>>> 2fa7adf (added meta, data displayed in json format)
 
       <Handle type="target" position={Position.Top} />
       <Handle type="source" position={Position.Bottom} />
