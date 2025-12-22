@@ -18,18 +18,10 @@ export default function CustomNode(props: NodeProps<FlowNode>) {
       <div className="font-semibold">{data.label}</div>
       <div className="text-xs opacity-70">{data.kind}</div>
 
-<<<<<<< HEAD
-      {Object.entries(data.meta).map(([k, v]) => (
-        <div key={k} className="text-xs">
-          {k}: {Array.isArray(v) ? v.join(', ') : String(v)}
-        </div>
-      ))}
 
-=======
       <pre className="mt-2 text-xs font-mono whitespace-pre">
         {renderMeta(data.meta)}
       </pre>
->>>>>>> 2fa7adf (added meta, data displayed in json format)
 
       <Handle type="target" position={Position.Top} />
       <Handle type="source" position={Position.Bottom} />
