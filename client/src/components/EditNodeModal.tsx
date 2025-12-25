@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import type { CustomNodeData } from "../types/NodeTypes";
 import type { Node } from "@xyflow/react";
+import Editor from "@monaco-editor/react";
+import { isDark } from "../theme/theme";
+
 
 interface Props {
   open: boolean;
@@ -50,6 +53,7 @@ export default function EditNodeModal({
         label,
         kind,
         meta: parsedMeta,
+        handles: selectedNode.data.handles
       });
 
       onClose();
@@ -83,11 +87,22 @@ export default function EditNodeModal({
 
         <div className="mb-3">
           <label className="text-sm block mb-1">Meta (JSON)</label>
-          <textarea
-            className="w-full h-40 p-2 bg-background font-mono text-xs rounded"
+          <Editor
+            height="160px"
+            language="json"
             value={metaText}
-            onChange={(e) => setMetaText(e.target.value)}
+            theme={isDark()?"vs-light":"vs-dark"}
+            onChange={(value) => setMetaText(value ?? "{}")}
+            options={{
+              minimap: { enabled: false },
+              fontSize: 12,
+              automaticLayout: true,
+              formatOnType: true,
+              formatOnPaste: true,
+              tabSize: 1,
+            }}
           />
+
         </div>
 
         {error && <p className="text-red-400 text-sm mb-2">{error}</p>}

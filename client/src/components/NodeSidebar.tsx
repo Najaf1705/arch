@@ -4,6 +4,8 @@ import type { CustomNodeData } from "../types/NodeTypes";
 import ConfirmModal from "./ConfirmModal";
 import EditNodeModal from "./EditNodeModal";
 import { renderMeta } from "../utils/formatMetaVal";
+import MetaTree from "./MetaTree";
+import CreateNodeModal from "./CreateNodeModal";
 
 interface Props {
   selectedNode: Node<CustomNodeData> | null;
@@ -26,6 +28,7 @@ export default function NodeSidebar({
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [duplicateOpen, setDuplicateOpen] = useState(false);
 
   /* -------------------- Delete Node -------------------- */
   const handleDelete = () => {
@@ -36,7 +39,6 @@ export default function NodeSidebar({
       prev.filter(e => e.source !== selectedNode.id && e.target !== selectedNode.id)
     );
 
-    // Clear selected node
     setSelectedNode(null);
     setModalOpen(false);
   };
@@ -49,7 +51,6 @@ export default function NodeSidebar({
     setModalOpen(false);
     setSelectedNode(null);
   };
-
 
   /* -------------------- Resize Logic -------------------- */
   const startResizing = () => {
@@ -71,46 +72,53 @@ export default function NodeSidebar({
     document.addEventListener("mouseup", onMouseUp);
   };
 
-  /* -------------------- Meta Renderer -------------------- */
-  const metaRenderer = () =>
-    <div className="mt-2 text-xs font-mono whitespace-pre">
-  <pre className="m-0 p-0">
-    {renderMeta(selectedNode?.data.meta)}
-  </pre>
-</div>
-
-
-  /* -------------------- JSX -------------------- */
   return (
     <>
       <aside
         ref={sidebarRef}
         style={{ width }}
-        className="fixed right-0 top-0 h-screen p-4 border-l bg-foreground text-background z-50 flex flex-col"
+        className="
+          fixed right-0 top-0 h-screen p-4
+          bg-c1 text-foreground
+          border-l border-border
+          z-10 flex flex-col
+        "
       >
+        {/* Resize handle */}
         <div
           onMouseDown={startResizing}
-          className="absolute left-0 top-0 h-full w-1 cursor-ew-resize hover:bg-gray-400/70"
+          className="
+            absolute left-0 top-0 h-full w-1
+            cursor-ew-resize
+            hover:bg-c2
+          "
         />
 
         {selectedNode ? (
           <>
             {/* Header */}
-            <div className="flex justify-between items-center mb-4 gap-2">
+<div className="flex flex-wrap items-start justify-between gap-2 mb-4">
               <h2 className="text-lg font-bold">Node Details</h2>
 
-              <div className="flex gap-2">
+<div className="flex flex-wrap gap-2 justify-end">
                 <button
                   onClick={() => setEditOpen(true)}
-                  className="px-2 py-1 rounded border-2 border-background hover:bg-gray-700 cursor-pointer"
+className="btn btn-secondary text-xs px-2 py-1"
                   title="Edit Node"
                 >
                   Edit
                 </button>
 
                 <button
+                  onClick={() => setDuplicateOpen(true)}
+className="btn btn-secondary text-xs px-2 py-1"
+                >
+                  Duplicate
+                </button>
+
+                <button
                   onClick={() => setModalOpen(true)}
-                  className="text-blue-100 cursor-pointer px-2 bg-red-500  hover:bg-red-600 rounded"
+className="btn btn-danger text-xs px-2 py-1"
                   title="Delete Node"
                 >
                   Delete
@@ -131,20 +139,22 @@ export default function NodeSidebar({
 
             {/* Meta */}
             <h3 className="text-md font-semibold mb-2 mt-4">Meta</h3>
-            {selectedNode?.data.meta && Object.keys(selectedNode.data.meta).length > 0
-              ? metaRenderer()
-              : <p className="text-xs text-gray-400">No meta data</p>}
 
+            {Object.keys(selectedNode.data.meta).length === 0 ? (
+              <p className="text-xs text-foreground/60">No meta data</p>
+            ) : (
+              <MetaTree value={selectedNode.data.meta} />
+            )}
           </>
         ) : selectedEdge ? (
-          /* EDGE VIEW */
           <>
+            {/* EDGE VIEW */}
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold">Edge Details</h2>
 
               <button
                 onClick={() => setModalOpen(true)}
-                className="px-2 py-1 bg-red-500 hover:bg-red-600 rounded cursor-pointer"
+                className="btn btn-danger"
               >
                 Delete
               </button>
@@ -153,17 +163,15 @@ export default function NodeSidebar({
             <div className="text-sm mb-2">
               <strong>ID:</strong> {selectedEdge.id}
             </div>
-
             <div className="text-sm mb-2">
               <strong>Source:</strong> {selectedEdge.source}
             </div>
-
             <div className="text-sm mb-2">
               <strong>Target:</strong> {selectedEdge.target}
             </div>
           </>
         ) : (
-          <p className="text-sm text-background">No selection</p>
+          <p className="text-sm text-foreground/60">No selection</p>
         )}
       </aside>
 
@@ -179,7 +187,6 @@ export default function NodeSidebar({
         onCancel={() => setModalOpen(false)}
       />
 
-
       {/* Edit Modal */}
       {selectedNode && (
         <EditNodeModal
@@ -187,17 +194,36 @@ export default function NodeSidebar({
           selectedNode={selectedNode}
           onClose={() => setEditOpen(false)}
           onSubmit={(data) => {
-            // Update nodes array
             setNodes(prev =>
               prev.map(n =>
                 n.id === selectedNode.id ? { ...n, data } : n
               )
             );
-
-            // Update selectedNode to trigger sidebar re-render
             setSelectedNode(prev => prev && { ...prev, data });
-
             setEditOpen(false);
+          }}
+        />
+      )}
+
+      {/* Duplicate */}
+      {selectedNode && duplicateOpen && (
+        <CreateNodeModal
+          initialData={selectedNode.data}
+          onClose={() => setDuplicateOpen(false)}
+          onSubmit={(data) => {
+            setNodes(prev => [
+              ...prev,
+              {
+                id: crypto.randomUUID(),
+                type: selectedNode.type,
+                position: {
+                  x: selectedNode.position.x + 40,
+                  y: selectedNode.position.y + 40,
+                },
+                data,
+              },
+            ]);
+            setDuplicateOpen(false);
           }}
         />
       )}

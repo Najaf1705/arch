@@ -1,5 +1,3 @@
-import React from "react";
-
 interface Props {
   isOpen: boolean;
   title?: string;
@@ -18,20 +16,43 @@ export default function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded shadow-lg p-6 w-80">
-        <h2 className="text-lg font-bold mb-4">{title}</h2>
-        <p className="mb-6">{message}</p>
+    <div
+      className="
+        fixed inset-0 z-50 flex items-center justify-center
+        bg-background/60 backdrop-blur-sm
+      "
+      onClick={onCancel}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="
+          w-80 rounded-lg
+          bg-c1
+          border border-border
+          shadow-xl
+          p-6
+        "
+      >
+        <h2 className="text-sm font-semibold text-foreground mb-2">
+          {title}
+        </h2>
+
+        <p className="text-sm text-foreground/75 mb-6 leading-relaxed">
+          {message}
+        </p>
+
         <div className="flex justify-end gap-2">
           <button
             onClick={onCancel}
-            className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 cursor-pointer"
+            className="btn btn-secondary"
           >
             Cancel
           </button>
+
           <button
             onClick={onConfirm}
-            className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+            autoFocus
+            className="btn btn-danger"
           >
             Delete
           </button>

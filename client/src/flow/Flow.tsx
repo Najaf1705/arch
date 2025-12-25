@@ -150,10 +150,26 @@ function Flow() {
         }
     }
 
+
+
     /* ---------------- render ---------------- */
 
     return (
-        <div className="w-screen h-screen bg-mbackground relative">
+        <div className="w-screen h-screen bg-background relative">
+            {/* <div className="flex gap-2 mb-8 bg-black">
+                <div className="w-5 h-5 bg-background border border-border"></div>
+                <div className="w-5 h-5 bg-foreground border border-border"></div>
+                <div className="w-5 h-5 bg-c1 border border-border"></div>
+                <div className="w-5 h-5 bg-c2 border border-border"></div>
+                <div className="w-5 h-5 bg-c3 border border-border"></div>
+                <div className="w-5 h-5 bg-c4 border border-border"></div>
+                <div className="w-5 h-5 bg-c5 border border-border"></div>
+                <div className="w-5 h-5 bg-c6 border border-border"></div>
+                <div className="w-5 h-5 bg-c7 border border-border"></div>
+                <div className="w-5 h-5 bg-c8 border border-border"></div>
+                <div className="w-5 h-5 bg-c9 border border-border"></div>
+                <div className="w-5 h-5 bg-c10 border border-border"></div>
+            </div> */}
             {/* overlays */}
             <div className="absolute bottom-4 left-12 z-50">
                 <ThemeToggle />
@@ -174,8 +190,8 @@ function Flow() {
                 onConnect={onConnect}
                 onSelectionChange={onSelectionChange}
             >
-                <Background />
-                <Controls />
+                <Background color={`rgb(var(--foreground))`}/>
+                <Controls style={{color: "rgb(var(--c10))"}}/>
                 <MiniMap />
             </ReactFlow>
 

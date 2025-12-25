@@ -1,68 +1,112 @@
 @import "tailwindcss";
 
+/* =========================
+   DESIGN TOKENS
+========================= */
+
 :root {
-  --mbackground: 10 10 10;
-  --background: 170 170 170;
-  --foreground: 23 23 23;
-  
-  --primary: 240 5.9% 10%;
-  --secondary: 240 4.8% 95.9%;
-  --tertiary: 248 70% 64%;
-  
-  --border: 240 10% 3.9%;
+  --background: 234 228 233;
+  --foreground: 23 24 34;
+
+  --c1: 255 241 230;
+  --c2: 253 226 228;
+  --c3: 245 215 225;
+
+  --c4: 226 236 233;
+  --c5: 190 225 230;
+
+  --c6: 240 239 235;
+  --c7: 223 231 253;
+  --c8: 190 205 245;
+  --c9: 160 185 240;
+  --c10: 235 180 190;
+
+  --border: 210 200 210;
   --radius: 0.5rem;
 }
 
 .dark {
-  --mbackground: 255 255 255;
-  --background: 234 223 250;
-  --foreground: 237 237 237;
+  --background: 51 61 41;
+  --foreground: 240 236 226;
 
-  --primary: 0 0% 98%;
-  --secondary: 240 3.7% 15.9%;
-  --tertiary: 248 70% 64%;
+  --c1: 65 72 51;
+  --c2: 101 109 74;
+  --c3: 140 148 112;
 
-  --border: 0 0% 98%;
+  --c4: 194 197 170;
+  --c5: 182 173 144;
+
+  --c6: 147 102 57;
+  --c7: 127 79 36;
+  --c8: 88 47 14;
+  --c9: 166 138 100;
+  --c10: 170 90 70;
+
+  --border: 85 95 70;
 }
 
+
+.dark {
+  /* canvas */
+  --background: 18 20 24;        /* true dark */
+  --foreground: 235 236 240;    /* near-white */
+
+  /* surfaces */
+  --c1: 30 33 38;               /* cards */
+  --c2: 40 44 52;               /* hover */
+  --c3: 60 66 78;               /* divider */
+
+  /* subtle fills */
+  --c4: 52 58 70;
+  --c5: 66 72 86;
+
+  /* accents / semantics */
+  --c6: 120 130 150;            /* neutral */
+  --c7: 130 190 170;            /* success */
+  --c8: 150 170 220;            /* accent */
+  --c9: 120 160 255;            /* PRIMARY */
+  --c10: 235 120 120;           /* danger */
+
+  --border: 55 60 72;
+}
+
+
+/* =========================
+   THEME EXPORT
+========================= */
+
 @theme {
-  --color-mbackground: rgb(var(--mbackground));
   --color-background: rgb(var(--background));
   --color-foreground: rgb(var(--foreground));
 
-  --color-primary: hsl(var(--primary));
-  --color-secondary: hsl(var(--secondary));
-  --color-tertiary: hsl(var(--tertiary));
+  --color-c1: rgb(var(--c1));
+  --color-c2: rgb(var(--c2));
+  --color-c3: rgb(var(--c3));
+  --color-c4: rgb(var(--c4));
+  --color-c5: rgb(var(--c5));
+  --color-c6: rgb(var(--c6));
+  --color-c7: rgb(var(--c7));
+  --color-c8: rgb(var(--c8));
+  --color-c9: rgb(var(--c9));
+  --color-c10: rgb(var(--c10));
 
-  --color-border: hsl(var(--border));
-
+  --color-border: rgb(var(--border));
   --radius-md: var(--radius);
 }
 
-
+/* =========================
+   GLOBAL BASE
+========================= */
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  /* color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424; */
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
 }
 
 body {
@@ -71,41 +115,230 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background: rgb(var(--background));
+  color: rgb(var(--foreground));
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
+/* =========================
+   LINKS
+========================= */
 
-/* button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+a {
   font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+  color: rgb(var(--c9));
+  text-decoration: inherit;
 }
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-} */
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+a:hover {
+  color: rgb(var(--c8));
+}
+
+/* =========================
+   NODE HANDLES
+========================= */
+
+.custom-handle {
+  position: relative;
+}
+
+.custom-handle::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  padding: 2px 6px;
+  background: rgb(var(--foreground));
+  color: rgb(var(--background));
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.custom-handle:hover::after {
+  opacity: 1;
+}
+
+.handle-source {
+  background-color: rgb(var(--c7)) !important;
+  box-shadow: 0 0 6px rgb(var(--c7) / 0.8);
+}
+
+.handle-target {
+  background-color: rgb(var(--c10)) !important;
+  box-shadow: 0 0 6px rgb(var(--c10) / 0.8);
+}
+
+/* =========================
+   INPUTS
+========================= */
+
+.input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+
+  background: rgb(var(--c1));
+  color: rgb(var(--foreground));
+  border: 1px solid rgb(var(--border));
+
+  outline: none;
+  cursor: text;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input::placeholder {
+  color: rgb(var(--foreground) / 0.8);
+}
+
+.input:hover {
+  border-color: rgb(var(--c9) / 0.8);
+}
+
+.input:focus {
+  border-color: rgb(var(--c9));
+  box-shadow: 0 0 0 2px rgb(var(--c9) / 0.3);
+}
+
+.textarea {
+  resize: none;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 6px 12px;
+  font-size: 17px;
+  font-weight: 500;
+
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-secondary {
+  background: rgb(var(--c2));
+  color: rgb(var(--foreground));
+}
+
+.btn-secondary:hover {
+  background: rgb(var(--c3));
+}
+
+.btn-primary {
+  background: rgb(var(--c9));
+  color: rgb(var(--foreground));
+}
+
+.btn-primary:hover {
+  background: rgb(var(--c8));
+}
+
+.btn-danger {
+  background: rgb(var(--c10));
+  color: rgb(var(--background));
+}
+
+.btn-danger:hover {
+  background: rgb(var(--c9));
+}
+
+/* =========================
+   CHECKBOX
+========================= */
+
+.checkbox {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+
+  border-radius: 4px;
+  border: 2px solid rgb(var(--c10));
+  background: rgb(var(--c1));
+
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.checkbox:hover {
+  border-color: rgb(var(--c9));
+}
+
+.checkbox:checked {
+  background: rgb(var(--c9));
+  border-color: rgb(var(--c9));
+}
+
+.checkbox:checked::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: rgb(var(--background));
+}
+
+.checkbox:focus-visible {
+  box-shadow: 0 0 0 2px rgb(var(--c9) / 0.4);
+}
+
+/* =========================
+   RADIO
+========================= */
+
+.radio {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+
+  border: 1px solid rgb(var(--border));
+  background: rgb(var(--c1));
+
+  display: inline-grid;
+  place-content: center;
+  cursor: pointer;
+}
+
+.radio:checked::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgb(var(--c9));
+}
+
+.radio:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* =========================
+   CURSORS
+========================= */
+
+button,
+label,
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+}
+
+input[type="text"],
+textarea {
+  cursor: text;
 }
