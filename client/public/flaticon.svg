@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <!-- Vibrant gradient -->
+    <linearGradient id="edgeGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="50%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+
+    <!-- Glow -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Cube cage -->
+  <polygon
+    points="64,20 104,44 104,84 64,108 24,84 24,44"
+    fill="none"
+    stroke="url(#edgeGradient)"
+    stroke-width="5"
+    filter="url(#glow)"
+  />
+
+  <!-- Vertical spine -->
+  <line
+    x1="64" y1="20" x2="64" y2="108"
+    stroke="url(#edgeGradient)"
+    stroke-width=""
+    opacity="0.65"
+  />
+
+  <!-- Nodes / joints -->
+  <g fill="url(#edgeGradient)">
+    <circle cx="64" cy="20" r="14"/>
+    <circle cx="104" cy="44" r="14"/>
+    <circle cx="104" cy="84" r="14"/>
+    <circle cx="64" cy="108" r="14"/>
+    <circle cx="24" cy="84" r="14"/>
+    <circle cx="24" cy="44" r="14"/>
+  </g>
+</svg>

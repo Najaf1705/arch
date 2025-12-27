@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+/* Disable text selection globally */
+* {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Re-enable selection where it actually matters */
+input,
+textarea,
+[contenteditable="true"] {
+  user-select: text;
+}
+
+.shadow-game {
+  color: var(--background);
+  text-shadow: -1px -1px 0 hsl(8, 100%, 50%),
+    1px -1px 0 hsl(133, 100%, 50%),
+    -1px 1px 0 hsl(303, 100%, 50%),
+    1px 1px 0 hsl(245, 100%, 50%);
+}
+
+.font-saria {
+  font-family: 'Saria', sans-serif;
+}
+
+
 /* =========================
    DESIGN TOKENS
 ========================= */
@@ -8,67 +35,67 @@
   --background: 234 228 233;
   --foreground: 23 24 34;
 
+  /* surfaces */
   --c1: 255 241 230;
   --c2: 253 226 228;
   --c3: 245 215 225;
 
+  /* subtle fills */
   --c4: 226 236 233;
   --c5: 190 225 230;
 
+  /* neutral */
   --c6: 240 239 235;
-  --c7: 223 231 253;
-  --c8: 190 205 245;
-  --c9: 160 185 240;
-  --c10: 235 180 190;
+
+  /* SUCCESS */
+  --c7: 56 178 140;     /* green-teal, boilerplate success */
+
+  /* secondary accent */
+  --c8: 150 185 235;
+
+  /* PRIMARY */
+  --c9: 96 140 255;     /* classic primary blue */
+
+  /* DANGER */
+  --c10: 235 90 90;     /* classic danger red */
 
   --border: 210 200 210;
   --radius: 0.5rem;
 }
 
 .dark {
-  --background: 51 61 41;
-  --foreground: 240 236 226;
-
-  --c1: 65 72 51;
-  --c2: 101 109 74;
-  --c3: 140 148 112;
-
-  --c4: 194 197 170;
-  --c5: 182 173 144;
-
-  --c6: 147 102 57;
-  --c7: 127 79 36;
-  --c8: 88 47 14;
-  --c9: 166 138 100;
-  --c10: 170 90 70;
-
-  --border: 85 95 70;
-}
-
-
-.dark {
-  /* canvas */
-  --background: 18 20 24;        /* true dark */
-  --foreground: 235 236 240;    /* near-white */
+  --background: 18 20 24;
+  --foreground: 235 236 240;
 
   /* surfaces */
-  --c1: 30 33 38;               /* cards */
-  --c2: 40 44 52;               /* hover */
-  --c3: 60 66 78;               /* divider */
+  --c1: 30 33 38;
+  --c2: 40 44 52;
+  --c3: 60 66 78;
 
   /* subtle fills */
   --c4: 52 58 70;
   --c5: 66 72 86;
 
-  /* accents / semantics */
-  --c6: 120 130 150;            /* neutral */
-  --c7: 130 190 170;            /* success */
-  --c8: 150 170 220;            /* accent */
-  --c9: 120 160 255;            /* PRIMARY */
-  --c10: 235 120 120;           /* danger */
+  /* neutral */
+  --c6: 120 130 150;
+
+  /* SUCCESS */
+  --c7: 80 200 160;    /* brighter for dark bg */
+
+  /* accent */
+  --c8: 150 170 220;
+
+  /* PRIMARY */
+  --c9: 120 160 255;
+
+  /* DANGER */
+  --c10: 240 110 110;
 
   --border: 55 60 72;
 }
+
+
+
 
 
 /* =========================
@@ -229,18 +256,21 @@ a:hover {
 }
 
 .btn-secondary {
-  background: rgb(var(--c2));
-  color: rgb(var(--foreground));
+  /* background: rgb(var(--c2)); */
+  border: rgb(var(--c9)) 2px solid;
+  color: rgb(var(--c9));
 }
 
 .btn-secondary:hover {
-  background: rgb(var(--c3));
+  background: rgb(var(--c9));
+  color: rgb(var(--background));
 }
 
 .btn-primary {
   background: rgb(var(--c9));
-  color: rgb(var(--foreground));
+  color: rgb(var(--background));
 }
+
 
 .btn-primary:hover {
   background: rgb(var(--c8));
@@ -252,7 +282,7 @@ a:hover {
 }
 
 .btn-danger:hover {
-  background: rgb(var(--c9));
+  background: rgb(var(--c10)/0.8);
 }
 
 /* =========================
@@ -265,7 +295,7 @@ a:hover {
   height: 16px;
 
   border-radius: 4px;
-  border: 2px solid rgb(var(--c10));
+  border: 2px solid rgb(var(--c9));
   background: rgb(var(--c1));
 
   display: inline-grid;
@@ -286,10 +316,12 @@ a:hover {
 
 .checkbox:checked::after {
   content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  background: rgb(var(--background));
+  width: 5px;
+  height: 9px;
+  border: solid rgb(var(--background));
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-bottom: 2px;
 }
 
 .checkbox:focus-visible {
@@ -306,7 +338,7 @@ a:hover {
   height: 14px;
   border-radius: 999px;
 
-  border: 1px solid rgb(var(--border));
+  border: 2px solid rgb(var(--c10));
   background: rgb(var(--c1));
 
   display: inline-grid;
@@ -319,7 +351,7 @@ a:hover {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: rgb(var(--c9));
+  background: rgb(var(--c10));
 }
 
 .radio:disabled {
@@ -341,4 +373,66 @@ input[type="radio"] {
 input[type="text"],
 textarea {
   cursor: text;
+}
+
+/* ===== Modal animation ===== */
+
+.modal-overlay {
+  opacity: 0;
+  transition: opacity 160ms ease-out;
+}
+
+.modal-overlay[data-open="true"] {
+  opacity: 1;
+}
+
+.modal-content {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition:
+    opacity 160ms ease-out,
+    transform 160ms ease-out;
+}
+
+.modal-content[data-open="true"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ===========================
+   Global Scrollbar Styling
+   =========================== */
+
+* {
+  scrollbar-width: thin;              /* Firefox */
+  scrollbar-color: rgba(120,120,120,.5) transparent;
+}
+
+/* WebKit browsers */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(120, 120, 120, 0.45);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(120, 120, 120, 0.7);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+button:hover svg {
+  filter: drop-shadow(0 0 4px rgba(99,102,241,0.6));
 }

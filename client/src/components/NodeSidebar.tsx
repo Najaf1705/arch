@@ -3,14 +3,15 @@ import type { Node, Edge } from "@xyflow/react";
 import type { CustomNodeData } from "../types/NodeTypes";
 import ConfirmModal from "./ConfirmModal";
 import EditNodeModal from "./EditNodeModal";
-import { renderMeta } from "../utils/formatMetaVal";
 import MetaTree from "./MetaTree";
 import CreateNodeModal from "./CreateNodeModal";
 
 interface Props {
   selectedNode: Node<CustomNodeData> | null;
   selectedEdge: Edge | null;
-  setSelectedNode: React.Dispatch<React.SetStateAction<Node<CustomNodeData> | null>>;
+  setSelectedNode: React.Dispatch<
+    React.SetStateAction<Node<CustomNodeData> | null>
+  >;
   setNodes: React.Dispatch<React.SetStateAction<Node<CustomNodeData>[]>>;
   setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
 }
@@ -26,33 +27,35 @@ export default function NodeSidebar({
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const isResizing = useRef(false);
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [duplicateOpen, setDuplicateOpen] = useState(false);
 
-  /* -------------------- Delete Node -------------------- */
-  const handleDelete = () => {
+  /* ---------------- Delete ---------------- */
+
+  const handleDeleteNode = () => {
     if (!selectedNode) return;
 
     setNodes(prev => prev.filter(n => n.id !== selectedNode.id));
     setEdges(prev =>
-      prev.filter(e => e.source !== selectedNode.id && e.target !== selectedNode.id)
+      prev.filter(
+        e => e.source !== selectedNode.id && e.target !== selectedNode.id,
+      ),
     );
 
     setSelectedNode(null);
-    setModalOpen(false);
+    setConfirmOpen(false);
   };
 
-  /* -------------------- Delete Edge -------------------- */
   const handleDeleteEdge = () => {
     if (!selectedEdge) return;
 
     setEdges(prev => prev.filter(e => e.id !== selectedEdge.id));
-    setModalOpen(false);
-    setSelectedNode(null);
+    setConfirmOpen(false);
   };
 
-  /* -------------------- Resize Logic -------------------- */
+  /* ---------------- Resize ---------------- */
+
   const startResizing = () => {
     isResizing.current = true;
 
@@ -72,16 +75,19 @@ export default function NodeSidebar({
     document.addEventListener("mouseup", onMouseUp);
   };
 
+  /* ---------------- Render ---------------- */
+
   return (
     <>
       <aside
         ref={sidebarRef}
         style={{ width }}
         className="
-          fixed right-0 top-0 h-screen p-4
+          fixed right-0 top-0 h-screen
           bg-c1 text-foreground
           border-l border-border
-          z-10 flex flex-col
+          z-20
+          flex flex-col
         "
       >
         {/* Resize handle */}
@@ -94,100 +100,111 @@ export default function NodeSidebar({
           "
         />
 
-        {selectedNode ? (
-          <>
-            {/* Header */}
-<div className="flex flex-wrap items-start justify-between gap-2 mb-4">
-              <h2 className="text-lg font-bold">Node Details</h2>
+        {/* ================= CONTENT (SCROLLS) ================= */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {selectedNode ? (
+            <>
+              <h2 className="text-lg font-bold mb-4">Node Details</h2>
 
-<div className="flex flex-wrap gap-2 justify-end">
-                <button
-                  onClick={() => setEditOpen(true)}
-className="btn btn-secondary text-xs px-2 py-1"
-                  title="Edit Node"
-                >
-                  Edit
-                </button>
-
-                <button
-                  onClick={() => setDuplicateOpen(true)}
-className="btn btn-secondary text-xs px-2 py-1"
-                >
-                  Duplicate
-                </button>
-
-                <button
-                  onClick={() => setModalOpen(true)}
-className="btn btn-danger text-xs px-2 py-1"
-                  title="Delete Node"
-                >
-                  Delete
-                </button>
+              <div className="text-sm mb-2">
+                <strong>ID:</strong> {selectedNode.id}
               </div>
-            </div>
+              <div className="text-sm mb-2">
+                <strong>Label:</strong> {selectedNode.data.label}
+              </div>
+              <div className="text-sm mb-2">
+                <strong>Kind:</strong> {selectedNode.data.kind}
+              </div>
 
-            {/* Core Fields */}
-            <div className="text-sm mb-2">
-              <strong>ID:</strong> {selectedNode.id}
-            </div>
-            <div className="text-sm mb-2">
-              <strong>Label:</strong> {selectedNode.data.label}
-            </div>
-            <div className="text-sm mb-2">
-              <strong>Kind:</strong> {selectedNode.data.kind}
-            </div>
+              <h3 className="text-md font-semibold mt-4 mb-2">Meta</h3>
 
-            {/* Meta */}
-            <h3 className="text-md font-semibold mb-2 mt-4">Meta</h3>
+              {Object.keys(selectedNode.data.meta).length === 0 ? (
+                <p className="text-xs text-foreground/60">
+                  No meta data
+                </p>
+              ) : (
+                <MetaTree value={selectedNode.data.meta} />
+              )}
+            </>
+          ) : selectedEdge ? (
+            <>
+              <h2 className="text-lg font-bold mb-4">Edge Details</h2>
 
-            {Object.keys(selectedNode.data.meta).length === 0 ? (
-              <p className="text-xs text-foreground/60">No meta data</p>
-            ) : (
-              <MetaTree value={selectedNode.data.meta} />
-            )}
-          </>
-        ) : selectedEdge ? (
-          <>
-            {/* EDGE VIEW */}
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">Edge Details</h2>
+              <div className="text-sm mb-2">
+                <strong>ID:</strong> {selectedEdge.id}
+              </div>
+              <div className="text-sm mb-2">
+                <strong>Source:</strong> {selectedEdge.source}
+              </div>
+              <div className="text-sm mb-2">
+                <strong>Target:</strong> {selectedEdge.target}
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-foreground/60">
+              No selection
+            </p>
+          )}
+        </div>
+
+        {/* ================= FOOTER (FIXED) ================= */}
+        <div
+          className="
+            p-3
+            flex flex-wrap gap-2 justify-end
+            bg-c1
+            backdrop-blur-sm
+          "
+        >
+          {selectedNode && (
+            <>
+              <button
+                onClick={() => setEditOpen(true)}
+                className="btn btn-secondary text-xs px-2 py-1"
+              >
+                Edit
+              </button>
 
               <button
-                onClick={() => setModalOpen(true)}
-                className="btn btn-danger"
+                onClick={() => setDuplicateOpen(true)}
+                className="btn btn-secondary text-xs px-2 py-1"
+              >
+                Duplicate
+              </button>
+
+              <button
+                onClick={() => setConfirmOpen(true)}
+                className="btn btn-danger text-xs px-2 py-1"
               >
                 Delete
               </button>
-            </div>
+            </>
+          )}
 
-            <div className="text-sm mb-2">
-              <strong>ID:</strong> {selectedEdge.id}
-            </div>
-            <div className="text-sm mb-2">
-              <strong>Source:</strong> {selectedEdge.source}
-            </div>
-            <div className="text-sm mb-2">
-              <strong>Target:</strong> {selectedEdge.target}
-            </div>
-          </>
-        ) : (
-          <p className="text-sm text-foreground/60">No selection</p>
-        )}
+          {!selectedNode && selectedEdge && (
+            <button
+              onClick={() => setConfirmOpen(true)}
+              className="btn btn-danger text-xs px-2 py-1"
+            >
+              Delete
+            </button>
+          )}
+        </div>
       </aside>
 
-      {/* Delete Confirmation */}
+      {/* ================= MODALS ================= */}
+
       <ConfirmModal
-        isOpen={modalOpen}
+        isOpen={confirmOpen}
         message={
           selectedNode
-            ? "Are you sure you want to delete this node? All connected edges will also be removed."
-            : "Are you sure you want to delete this edge?"
+            ? "Delete this node and all connected edges?"
+            : "Delete this edge?"
         }
-        onConfirm={selectedNode ? handleDelete : handleDeleteEdge}
-        onCancel={() => setModalOpen(false)}
+        onConfirm={selectedNode ? handleDeleteNode : handleDeleteEdge}
+        onCancel={() => setConfirmOpen(false)}
       />
 
-      {/* Edit Modal */}
       {selectedNode && (
         <EditNodeModal
           open={editOpen}
@@ -196,8 +213,8 @@ className="btn btn-danger text-xs px-2 py-1"
           onSubmit={(data) => {
             setNodes(prev =>
               prev.map(n =>
-                n.id === selectedNode.id ? { ...n, data } : n
-              )
+                n.id === selectedNode.id ? { ...n, data } : n,
+              ),
             );
             setSelectedNode(prev => prev && { ...prev, data });
             setEditOpen(false);
@@ -205,7 +222,6 @@ className="btn btn-danger text-xs px-2 py-1"
         />
       )}
 
-      {/* Duplicate */}
       {selectedNode && duplicateOpen && (
         <CreateNodeModal
           initialData={selectedNode.data}

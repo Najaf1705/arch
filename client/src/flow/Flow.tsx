@@ -179,6 +179,16 @@ function Flow() {
                 <NodeMenu onCreateNode={addNode} />
             </div>
 
+            {/* App icon */}
+            <div className="absolute top-4 left-4 z-50 flex flex-row items-center gap-2 cursor-pointer">
+                <img
+                    src="/flaticon.svg"
+                    alt="Nerch"
+                    className="w-12 h-12"
+                />
+                <h1 className='text-2xl shadow-game font-stretch-ultra-expanded'>NERCH</h1>
+            </div>
+
             {/* canvas */}
             <ReactFlow
                 className="absolute inset-0"
@@ -190,8 +200,8 @@ function Flow() {
                 onConnect={onConnect}
                 onSelectionChange={onSelectionChange}
             >
-                <Background color={`rgb(var(--foreground))`}/>
-                <Controls style={{color: "rgb(var(--c10))"}}/>
+                <Background color={`rgb(var(--foreground))`} />
+                <Controls style={{ color: "rgb(var(--c10))" }} />
                 <MiniMap />
             </ReactFlow>
 

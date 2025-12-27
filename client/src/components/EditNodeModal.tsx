@@ -18,13 +18,11 @@ export default function EditNodeModal({
   onClose,
   onSubmit,
 }: Props) {
-  // Local state for inputs
   const [label, setLabel] = useState("");
   const [kind, setKind] = useState("");
   const [metaText, setMetaText] = useState("{}");
   const [error, setError] = useState("");
 
-  // Initialize state whenever modal opens or selectedNode changes
   useEffect(() => {
     if (open && selectedNode) {
       setLabel(selectedNode.data.label);
@@ -34,7 +32,7 @@ export default function EditNodeModal({
     }
   }, [open, selectedNode]);
 
-  if (!open || !selectedNode) return null; // Guard against null
+  if (!open || !selectedNode) return null;
 
   const handleSubmit = () => {
     try {
@@ -53,7 +51,7 @@ export default function EditNodeModal({
         label,
         kind,
         meta: parsedMeta,
-        handles: selectedNode.data.handles
+        handles: selectedNode.data.handles,
       });
 
       onClose();
@@ -63,57 +61,100 @@ export default function EditNodeModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-      <div className="w-[500px] bg-foreground p-4 rounded shadow-lg">
-        <h2 className="text-lg font-bold mb-4">Edit Node</h2>
+    <div
+      className="
+        fixed inset-0 z-50
+        flex items-center justify-center
+        bg-background/60 backdrop-blur-sm
+      "
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="
+          w-[500px]
+          rounded-lg
+          bg-c1
+          border border-border
+          shadow-lg
+          p-4
+          text-foreground
+        "
+      >
+        <h2 className="text-lg font-semibold mb-4">
+          Edit Node
+        </h2>
 
+        {/* Label */}
         <div className="mb-3">
-          <label className="text-sm block mb-1">Label</label>
+          <label className="text-sm mb-1 block">
+            Label
+          </label>
           <input
-            className="w-full p-2 bg-background rounded"
+            className="input"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
           />
         </div>
 
+        {/* Kind */}
         <div className="mb-3">
-          <label className="text-sm block mb-1">Kind</label>
+          <label className="text-sm mb-1 block">
+            Kind
+          </label>
           <input
-            className="w-full p-2 bg-background rounded"
+            className="input"
             value={kind}
             onChange={(e) => setKind(e.target.value)}
           />
         </div>
 
+        {/* Meta */}
         <div className="mb-3">
-          <label className="text-sm block mb-1">Meta (JSON)</label>
+          <label className="text-sm mb-1 block">
+            Meta (JSON)
+          </label>
+
           <Editor
             height="160px"
             language="json"
             value={metaText}
-            theme={isDark()?"vs-light":"vs-dark"}
-            onChange={(value) => setMetaText(value ?? "{}")}
+            theme={isDark() ? "vs-dark" : "vs-light"}
+            onChange={(value) => {
+              setMetaText(value ?? "{}");
+              setError("");
+            }}
             options={{
               minimap: { enabled: false },
               fontSize: 12,
               automaticLayout: true,
               formatOnType: true,
               formatOnPaste: true,
-              tabSize: 1,
+              tabSize: 2,
+              scrollBeyondLastLine: false,
             }}
           />
-
         </div>
 
-        {error && <p className="text-red-400 text-sm mb-2">{error}</p>}
+        {/* Error */}
+        {error && (
+          <p className="text-sm text-c10 mb-2">
+            {error}
+          </p>
+        )}
 
-        <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-3 py-1 cursor-pointer">
+        {/* Actions */}
+        <div className="flex justify-end gap-2 mt-4">
+          <button
+            onClick={onClose}
+            className="btn btn-secondary"
+          >
             Cancel
           </button>
+
           <button
             onClick={handleSubmit}
-            className="px-3 py-1 bg-amber-500 text-black rounded cursor-pointer"
+            className="btn btn-primary"
           >
             Save
           </button>
