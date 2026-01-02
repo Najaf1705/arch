@@ -21,6 +21,7 @@ import NodeMenu from '../components/NodeMenu'
 import NodeSidebar from '../components/NodeSidebar'
 
 import type { CustomNodeData, FlowNode } from '../types/NodeTypes'
+import GithubLink from '../components/GithubLink'
 
 const nodeTypes = {
     customNode: CustomNode,
@@ -171,8 +172,9 @@ function Flow() {
                 <div className="w-5 h-5 bg-c10 border border-border"></div>
             </div> */}
             {/* overlays */}
-            <div className="absolute bottom-4 left-12 z-50">
+            <div className="absolute bottom-4 left-12 z-50 flex justify-center gap-2">
                 <ThemeToggle />
+                <GithubLink/>
             </div>
 
             <div className="absolute top-4 left-4 z-50">
