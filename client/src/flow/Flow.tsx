@@ -173,10 +173,7 @@ function Flow() {
                 <div className="w-5 h-5 bg-c10 border border-border"></div>
             </div> */}
             {/* overlays */}
-            <div className="absolute bottom-4 left-12 z-50 flex justify-center gap-2">
-                <ThemeToggle />
-                <GithubLink/>
-            </div>
+            
 
             <div className="absolute top-4 left-4 z-50">
                 <NodeMenu onCreateNode={addNode} />

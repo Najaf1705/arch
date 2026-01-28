@@ -13,6 +13,8 @@ import Dashboard from "./pages/Dashboard";
 
 import PublicOnlyRoute from "./routing/PublicOnlyRoute";
 import VerifyOtp from "./pages/VerifyOtp";
+import ThemeToggle from "./theme/ThemeToggle";
+import GithubLink from "./components/GithubLink";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -54,7 +56,7 @@ function App() {
         />
 
         <Route
-          path="/setPass"
+          path="/set-password"
           element={
             <PublicOnlyRoute>
               <SetPassword />
@@ -69,6 +71,10 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
 
       </Routes>
+      <div className="absolute bottom-4 left-12 z-50 flex justify-center gap-2">
+        <ThemeToggle />
+        <GithubLink />
+      </div>
     </BrowserRouter>
   );
 }
