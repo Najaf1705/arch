@@ -12,18 +12,18 @@ import com.arch.server.services.AuthServices.LoginServices;
 import com.arch.server.services.AuthServices.OtpService;
 import com.arch.server.services.AuthServices.RegisterServices;
 import com.arch.server.services.UserService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -95,22 +95,7 @@ public class AuthController {
                         )
                 );
 
-        // 3. Generate JWT
-        String token = jwtUtil.generateToken(user.getId());
-
-        // 4. Secure cookie
-        Cookie cookie = new Cookie("jwt", token);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60); // 1 hour
-        cookie.setSecure(true);   // HTTPS only in prod
-        cookie.setAttribute("SameSite", "None");
-
-
-        // Optional but recommended
-        cookie.setAttribute("SameSite", "Strict");
-
-        res.addCookie(cookie);
+        setJwtCookie(res, jwtUtil.generateToken(user.getId()));
 
         return ResponseEntity.ok().build();
     }
@@ -123,27 +108,22 @@ public class AuthController {
             HttpServletResponse res
     ) {
         User user = registerServices.verifyOtpAndRegister(req);
-
-        String token = jwtUtil.generateToken(user.getId());
-
-        Cookie cookie = new Cookie("jwt", token);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(3600); // 1 hour
-        cookie.setSecure(true); // true in production (HTTPS)
-        cookie.setAttribute("SameSite", "None");
-
-        res.addCookie(cookie);
-
+        setJwtCookie(res,jwtUtil.generateToken(user.getId()));
         return ResponseEntity.ok().build();
     }
 
     // ---------------- LOGIN ----------------
 
     @PostMapping("/login/local")
-    public ResponseEntity<?> login(@Valid @RequestBody LocalLoginDTO request, HttpServletResponse res) {
-        return ResponseEntity.ok(loginServices.localLogin(request,res));
+    public ResponseEntity<?> login(
+            @Valid @RequestBody LocalLoginDTO request,
+            HttpServletResponse res
+    ) {
+        String userId = loginServices.localLogin(request);
+        setJwtCookie(res,userId);
+        return ResponseEntity.ok().build();
     }
+
 
     // ---------------- GOOGLE LOGIN ----------------
 
@@ -178,34 +158,42 @@ public class AuthController {
         // ---- CASE 3: User does not exist, password provided → register ----
         User newUser = googleAuthServices.createGoogleUser(info, req.getPassword());
 
-        String jwt = jwtUtil.generateToken(newUser.getId());
-        setJwtCookie(res, jwt);
+        setJwtCookie(res, jwtUtil.generateToken(newUser.getId()));
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/logout")
     public void logout(HttpServletResponse response) {
-
-        Cookie cookie = new Cookie("jwt", "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0); // 🔥 delete cookie
-        cookie.setAttribute("SameSite", "None");
-
-
-        response.addCookie(cookie);
+        clearJwtCookie(response);
     }
 
-
+    // =====================================================
+    // 🔐 MODERN COOKIE HANDLING (THIS IS THE IMPORTANT PART)
+    // =====================================================
 
     private void setJwtCookie(HttpServletResponse res, String jwt) {
-        Cookie cookie = new Cookie("jwt", jwt);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(3600);
-        res.addCookie(cookie);
+
+        ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
+                .httpOnly(true)
+                .secure(true)          // REQUIRED in prod (HTTPS)
+                .sameSite("None")     // REQUIRED for cross-domain
+                .path("/")
+                .maxAge(60 * 60)
+                .build();
+
+        res.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
+    private void clearJwtCookie(HttpServletResponse res) {
+
+        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        res.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
 }

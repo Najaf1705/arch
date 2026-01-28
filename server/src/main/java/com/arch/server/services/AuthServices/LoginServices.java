@@ -21,31 +21,17 @@ public class LoginServices {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-    public ResponseEntity<?> localLogin(LocalLoginDTO req, HttpServletResponse res) {
+    public String localLogin(LocalLoginDTO req) {
 
-        System.out.println(req);
         User user = userRepository.findByEmail(req.getEmail())
                 .orElseThrow(InvalidCredentialsException::new);
 
-        System.out.println("user fnd");
         if (!user.isPasswordSet() ||
                 !passwordEncoder.matches(req.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException();
         }
 
-        String token = jwtUtil.generateToken(user.getId());
-
-        Cookie cookie = new Cookie("jwt", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(3600);
-        cookie.setAttribute("SameSite", "None");
-
-
-        res.addCookie(cookie);
-
-
-        return ResponseEntity.ok().build();
+        return jwtUtil.generateToken(user.getId());
     }
+
 }
