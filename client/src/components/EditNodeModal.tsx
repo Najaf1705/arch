@@ -3,6 +3,7 @@ import type { CustomNodeData } from "../types/NodeTypes";
 import type { Node } from "@xyflow/react";
 import Editor from "@monaco-editor/react";
 import { isDark } from "../theme/theme";
+import { useAppSelector } from "../redux/hooks";
 
 
 interface Props {
@@ -22,6 +23,7 @@ export default function EditNodeModal({
   const [kind, setKind] = useState("");
   const [metaText, setMetaText] = useState("{}");
   const [error, setError] = useState("");
+  const x=useAppSelector((state)=>state.user.name);
 
   useEffect(() => {
     if (open && selectedNode) {
@@ -69,6 +71,7 @@ export default function EditNodeModal({
       "
       onClick={onClose}
     >
+      <h2>{x}</h2>
       <div
         onClick={(e) => e.stopPropagation()}
         className="

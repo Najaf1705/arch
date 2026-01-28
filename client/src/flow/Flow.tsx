@@ -28,6 +28,7 @@ const nodeTypes = {
 }
 
 function Flow() {
+    console.log(import.meta.env.VITE_APP_BACKEND_URL)
     /* ---------------- persistence ---------------- */
 
     const savedNodes = localStorage.getItem('flow-nodes')

@@ -9,6 +9,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 @Data
 @ToString(exclude = "password")
 @Document(collection = "users")
@@ -25,9 +27,13 @@ public class User {
     @Indexed(unique = true)
     private String email;
 
+    private String googleId;
+
     @NotBlank(message = "Password is required")
 //    @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
+
+    private boolean isPasswordSet;
 
     private String profilePicture;
 
@@ -38,4 +44,6 @@ public class User {
 
     @NotNull(message = "Role is required")
     private Role role;
+
+    private List<String> graphs;
 }

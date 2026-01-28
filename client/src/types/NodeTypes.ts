@@ -19,8 +19,18 @@ export type CustomNodeData = {
   label: string
   kind: string
   meta: Record<string, MetaValue>
-  highlighted?: boolean   // ✅ MOVE HERE
   handles?: NodeHandle[]
 }
+
+export type StoredNode={
+  id: string
+  label: string
+  kind: string
+  meta: Record<string, MetaValue>
+  handles?: NodeHandle[]
+  position: {x: Number, y: Number}
+}
+
+// export type BackendNode = Omit<FlowNode, 'highlighted'> & 'id';
 
 export type FlowNode = Node<CustomNodeData>

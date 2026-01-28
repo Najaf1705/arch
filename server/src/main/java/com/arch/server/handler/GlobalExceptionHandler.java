@@ -2,6 +2,8 @@ package com.arch.server.handler;
 
 import com.arch.server.error.ApiError;
 import com.arch.server.exceptions.AuthExceptions.EmailAlreadyExistsException;
+import com.arch.server.exceptions.AuthExceptions.GoogleLoginException;
+import com.arch.server.exceptions.AuthExceptions.InvalidCredentialsException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +19,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<?> handleEmailAlreadyExists(
+    public ResponseEntity<ApiError> handleEmailAlreadyExists(
             EmailAlreadyExistsException ex
     ) {
         return ResponseEntity
@@ -54,6 +56,33 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(apiError);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiError> handleInvalidCredentials(
+            InvalidCredentialsException ex
+    ){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ApiError(
+                        "INVALID_CREDENTIALS",
+                        ex.getMessage(),
+                        HttpStatus.BAD_REQUEST.value()
+                )
+        );
+    }
+
+
+    @ExceptionHandler(GoogleLoginException.class)
+    public ResponseEntity<ApiError> handleGoogleLogin(
+            GoogleLoginException ex
+    ){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                new ApiError(
+                        "EMAIL_UNVERIFIED",
+                        ex.getMessage(),
+                        HttpStatus.UNAUTHORIZED.value()
+                )
+        );
     }
 
 

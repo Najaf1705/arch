@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class GetAllUsers implements Query<Void, List<UserDTO>> {
+public class GetAllUsers implements Query<Void, List<User>> {
 
     private final UserRepository userRepository;
 
@@ -20,9 +20,9 @@ public class GetAllUsers implements Query<Void, List<UserDTO>> {
     }
 
     @Override
-    public ResponseEntity<List<UserDTO>> execute(Void input) {
+    public ResponseEntity<List<User>> execute(Void input) {
         List<User> users=userRepository.findAll();
-        List<UserDTO> userDTOs=users.stream().map(UserDTO::new).toList();
-        return ResponseEntity.status(HttpStatus.OK).body(userDTOs);
+//        List<UserDTO> userDTOs=users.stream().map(UserDTO::new).toList();
+        return ResponseEntity.status(HttpStatus.OK).body(users);
     }
 }
