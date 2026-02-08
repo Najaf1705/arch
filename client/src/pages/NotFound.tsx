@@ -25,7 +25,7 @@ function TextNode({ data }: any) {
   );
 }
 
-function ErrorNode({ data }: any) {
+function ErrorNode() {
   return (
     <div className="bg-c3 border-2 border-dashed rounded-2xl p-6 text-center">
       <div className="text-6xl font-extrabold">404</div>
