@@ -10,11 +10,11 @@ import Flow from "./flow/Flow";
 import { Profile } from "./pages/Profile";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import VerifyOtp from "./pages/VerifyOtp";
+import NotFound from "./pages/NotFound";
 
 import PublicOnlyRoute from "./routing/PublicOnlyRoute";
-import VerifyOtp from "./pages/VerifyOtp";
-import ThemeToggle from "./theme/ThemeToggle";
-import GithubLink from "./components/GithubLink";
+import Navbar from "./components/Navbar";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -25,55 +25,57 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
 
-        {/* 🚫 AUTH PAGES — block if already logged in */}
-        <Route
-          path="/login"
-          element={
-            <PublicOnlyRoute>
-              <Login />
-            </PublicOnlyRoute>
-          }
-        />
+        {/* Everything below navbar */}
+        <main className="flex-1 overflow-y-auto">
+          <Routes>
 
-        <Route
-          path="/register"
-          element={
-            <PublicOnlyRoute>
-              <Register />
-            </PublicOnlyRoute>
-          }
-        />
+            <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/graph" element={<Flow />} />
+            <Route path="/dashboard" element={<Dashboard />} />
 
-        <Route
-          path="/verify-otp"
-          element={
-            <PublicOnlyRoute>
-              <VerifyOtp />
-            </PublicOnlyRoute>
-          }
-        />
+            <Route
+              path="/login"
+              element={
+                <PublicOnlyRoute>
+                  <Login />
+                </PublicOnlyRoute>
+              }
+            />
 
-        <Route
-          path="/set-password"
-          element={
-            <PublicOnlyRoute>
-              <SetPassword />
-            </PublicOnlyRoute>
-          }
-        />
+            <Route
+              path="/register"
+              element={
+                <PublicOnlyRoute>
+                  <Register />
+                </PublicOnlyRoute>
+              }
+            />
 
-        {/* 🌍 PUBLIC PAGES — accessible to everyone */}
-        <Route path="/" element={<Flow />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+            <Route
+              path="/verify-otp"
+              element={
+                <PublicOnlyRoute>
+                  <VerifyOtp />
+                </PublicOnlyRoute>
+              }
+            />
 
-      </Routes>
-      <div className="absolute bottom-4 left-12 z-50 flex justify-center gap-2">
-        <ThemeToggle />
-        <GithubLink />
+            <Route
+              path="/set-password"
+              element={
+                <PublicOnlyRoute>
+                  <SetPassword />
+                </PublicOnlyRoute>
+              }
+            />
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
       </div>
     </BrowserRouter>
   );

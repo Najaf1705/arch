@@ -8,13 +8,10 @@ export function Profile() {
   const status = useAppSelector((state) => state.auth.status);
   const dispatch = useAppDispatch();
 
-  console.log(useAppSelector((state) => state.auth));
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
 
-  // Sync Redux → local state
   useEffect(() => {
     if (user) {
       setName(user.name ?? "");
@@ -23,103 +20,44 @@ export function Profile() {
     }
   }, [user]);
 
-  const handleSave = () => {
-    console.log({ name, email, photoUrl });
-  };
-
-  const handleCancel = () => {
-    if (!user) return;
-    setName(user.name ?? "");
-    setEmail(user.email ?? "");
-    setPhotoUrl(user.profilePicture ?? "");
-  };
-
   const logout = async () => {
     await dispatch(logoutThunk());
-    // no navigate, no fetchMe, no drama
   };
 
-  // ⛔ auth still resolving
   if (status === "loading" || status === "idle") {
-    return <div>Loading profile...</div>;
+    return <div className="p-8">Loading profile...</div>;
   }
 
-  // ⛔ not logged in
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
   return (
-      <div className="w-full max-w-[520px] rounded-xl bg-c1 border border-border p-6 shadow-md">
-        <h2 className="text-xl font-semibold mb-6">Profile</h2>
+    <div className="min-h-screen px-6 py-12 flex flex-col items-center gap-6">
 
-        {/* Avatar */}
-        <div className="flex justify-center mb-6">
-          <div className="rounded-full p-1 bg-c4">
-            <img
-              src={photoUrl || "/avatar.png"}
-              alt="Profile"
-              referrerPolicy="no-referrer"
-              crossOrigin="anonymous"
-              className="h-28 w-28 rounded-full object-cover bg-c6"
-            />
-          </div>
-        </div>
+      {/* Avatar */}
+      <img
+        src={photoUrl || "/avatar.png"}
+        alt="Profile"
+        referrerPolicy="no-referrer"
+        crossOrigin="anonymous"
+        className="h-32 w-32 rounded-full object-cover bg-c6"
+      />
 
-        {/* Name */}
-        <div className="mb-4">
-          <label className="text-sm mb-1 block text-foreground/80">
-            Name
-          </label>
-          <input
-            className="input bg-c4 text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-c9"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
+      {/* Name */}
+      <h1 className="text-2xl font-semibold">{name}</h1>
 
-        {/* Email */}
-        <div className="mb-4">
-          <label className="text-sm mb-1 block text-foreground/80">
-            Email
-          </label>
-          <input
-            className="input bg-c5 text-foreground border border-border opacity-80 cursor-not-allowed"
-            value={email}
-            disabled
-          />
-        </div>
+      {/* Email */}
+      <p className="text-foreground/70">{email}</p>
 
-        {/* Photo URL */}
-        <div className="mb-6">
-          <label className="text-sm mb-1 block text-foreground/80">
-            Profile Picture URL
-          </label>
-          <input
-            className="input bg-c4 text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-c9"
-            value={photoUrl}
-            onChange={(e) => setPhotoUrl(e.target.value)}
-          />
-        </div>
+      {/* Logout */}
+      <button
+        onClick={logout}
+        className="mt-6 px-6 py-2 rounded-md bg-c10 text-white hover:opacity-90 transition"
+      >
+        Logout
+      </button>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3">
-          <button className="px-4 py-2 rounded-md bg-c6 text-foreground hover:bg-c5 transition">
-            Cancel
-          </button>
-
-          <button className="px-4 py-2 rounded-md bg-c9 text-white hover:opacity-90 transition">
-            Save
-          </button>
-
-          <button
-            onClick={logout}
-            className="px-4 py-2 rounded-md bg-c10 text-white hover:opacity-90 transition"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-
+    </div>
   );
 }

@@ -29,14 +29,14 @@ export default function ThemeToggle() {
       title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       <span
-  className="
+        className="
     transition-all duration-300 ease-out
     rotate-0
     dark:rotate-12
   "
->
-  {dark ? <SunIcon /> : <MoonIcon />}
-</span>
+      >
+        {dark ? <SunIcon /> : <MoonIcon />}
+      </span>
 
     </button>
   )

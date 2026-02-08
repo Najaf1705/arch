@@ -10,7 +10,7 @@ import {
 import { handleGoogleLogin } from "../utils/handleGoogleLogin";
 import EyeToggle from "../components/EyeToggle";
 
-type Mode = "choice" | "password" | "otp";
+type Mode = "choice" | "password";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -62,13 +62,13 @@ export default function Login() {
       navigate("/profile");
 
     } catch {
-      setError("Invalid email or password");
+      setError("Invalid credentials");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ---------- OTP LOGIN ---------- */
+  /* ---------- OTP LOGIN (DIRECT SEND) ---------- */
 
   const loginWithOtp = async () => {
     setError(null);
@@ -117,13 +117,17 @@ export default function Login() {
 
         <div className={loading ? "pointer-events-none opacity-60" : ""}>
 
-
           <h2 className="text-xl text-center mb-4 font-semibold">
             Login
           </h2>
 
-          {/* EMAIL */}
+          {error && (
+            <p className="text-sm mb-3 text-red-500 text-center">
+              {error}
+            </p>
+          )}
 
+          {/* EMAIL */}
           <input
             className="input mb-2"
             placeholder="Email"
@@ -134,12 +138,6 @@ export default function Login() {
           {email && !isEmailValid && (
             <p className="text-xs mb-2 text-red-500">
               Enter a valid email address
-            </p>
-          )}
-
-          {error && (
-            <p className="text-sm mb-3 text-red-500 text-center">
-              {error}
             </p>
           )}
 
@@ -156,9 +154,10 @@ export default function Login() {
 
               <button
                 className="btn btn-secondary flex-1"
-                onClick={() => setMode("otp")}
+                onClick={loginWithOtp}
+                disabled={loading}
               >
-                Use OTP
+                {loading ? "Sending OTP…" : "Send OTP"}
               </button>
             </div>
           )}
@@ -204,27 +203,6 @@ export default function Login() {
             </>
           )}
 
-          {/* ---------- OTP FLOW ---------- */}
-
-          {isEmailValid && mode === "otp" && (
-            <>
-              <button
-                onClick={loginWithOtp}
-                disabled={loading || !canUseOtp}
-                className="btn btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? "Sending OTP…" : "Send OTP"}
-              </button>
-
-              <button
-                onClick={resetFlow}
-                className="text-sm mt-2 opacity-70 hover:underline"
-              >
-                Back
-              </button>
-            </>
-          )}
-
           {/* ---------- GOOGLE ---------- */}
 
           <div className="flex items-center gap-2 my-4">
@@ -248,9 +226,11 @@ export default function Login() {
               Register
             </Link>
           </p>
+
         </div>
 
       </div>
+
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/10 rounded-lg">
           <div className="animate-spin h-6 w-6 border-2 border-current border-t-transparent rounded-full" />
