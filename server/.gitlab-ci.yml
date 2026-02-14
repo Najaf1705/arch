@@ -3,7 +3,7 @@ stages:
   - deploy
 
 # -------------------------
-# BUILD STAGE (MAVEN)
+# BUILD STAGE
 # -------------------------
 build:
   stage: build
@@ -13,7 +13,7 @@ build:
     - mvn clean package -DskipTests
   artifacts:
     paths:
-      - target/*.jar
+      - server/target/*.jar
     expire_in: 1 day
 
 # -------------------------
@@ -26,10 +26,7 @@ deploy:
   before_script:
     - apk add --no-cache openssh
     - eval $(ssh-agent -s)
-
-    # Load SSH key from GitLab variable
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
 
@@ -40,55 +37,38 @@ deploy:
     - |
       TIMESTAMP=$(date +%d%m%Y_%H%M%S)
 
-      # ---------- Populate known_hosts ----------
-      for SERVER in "${SERVERS[@]}"; do
+      SERVERS="$DEPLOY_SERVERS"
+
+      # known_hosts
+      for SERVER in $SERVERS; do
         ssh-keyscan -H $SERVER >> ~/.ssh/known_hosts
       done
 
-      # ---------- Deployment ----------
-      for SERVER in "${SERVERS[@]}"; do
+      # deployment
+      for SERVER in $SERVERS; do
         echo "Deploying to $SERVER ..."
 
         ssh nerch@$SERVER "
-          set -e
-
           BACKUP=/opt/nerch/server_${TIMESTAMP}.jar
           CURRENT=/opt/nerch/server.jar
 
-          # Backup current jar if exists
           if [ -f \$CURRENT ]; then
             cp \$CURRENT \$BACKUP
-            echo 'Backup created:' \$BACKUP
           fi
         "
 
-        # Copy new jar
-        scp target/*.jar nerch@$SERVER:/opt/nerch/server.jar
-
-        # Restart service
+        scp server/target/*.jar nerch@$SERVER:/opt/nerch/server.jar
         ssh nerch@$SERVER "sudo systemctl restart nerch"
 
-        # Check service status
         if ssh nerch@$SERVER "sudo systemctl is-active --quiet nerch"; then
-          echo "Deployment successful on $SERVER"
+          echo "Deployment successful"
         else
-          echo "Deployment FAILED on $SERVER — rolling back"
+          echo "Deployment failed — rollback"
 
           ssh nerch@$SERVER "
-            CURRENT=/opt/nerch/server.jar
-            BACKUP=/opt/nerch/server_${TIMESTAMP}.jar
-            FAILED=/opt/nerch/server_failed_${TIMESTAMP}.jar
-
-            mv \$CURRENT \$FAILED
-            cp \$BACKUP \$CURRENT
+            mv /opt/nerch/server.jar /opt/nerch/server_failed_${TIMESTAMP}.jar
+            cp /opt/nerch/server_${TIMESTAMP}.jar /opt/nerch/server.jar
             sudo systemctl restart nerch
           "
-
-          echo "Rollback completed on $SERVER"
         fi
       done
-#test:
-#  script:
-#    - echo "Runner is alive"
-#
-
