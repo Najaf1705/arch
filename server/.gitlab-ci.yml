@@ -34,11 +34,12 @@ deploy:
     - printf "%s" "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/gitlab_key
     - chmod 600 ~/.ssh/gitlab_key
 
-    # SSH config (always use this key)
+    # Force SSH to use gitlab_key
     - |
       cat > ~/.ssh/config <<EOF
       Host *
         IdentityFile ~/.ssh/gitlab_key
+        IdentitiesOnly yes
         StrictHostKeyChecking no
       EOF
 
@@ -52,7 +53,7 @@ deploy:
 
       echo "DEPLOY_SERVERS = [$DEPLOY_SERVERS]"
 
-      # Fail fast if servers not provided
+      # Fail if no servers provided
       if [ -z "$DEPLOY_SERVERS" ]; then
         echo "ERROR: DEPLOY_SERVERS is empty"
         exit 1
@@ -63,7 +64,7 @@ deploy:
       echo "Artifacts available:"
       ls -lah server/target/
 
-      # Add hosts
+      # Add hosts to known_hosts
       for SERVER in $DEPLOY_SERVERS; do
         ssh-keyscan -H $SERVER >> ~/.ssh/known_hosts || true
       done
@@ -83,7 +84,7 @@ deploy:
 
         scp server/target/*.jar nerch@$SERVER:/opt/nerch/server.jar
 
-        # Show updated file info
+        # Show remote file (proof of update)
         ssh nerch@$SERVER "ls -lh /opt/nerch/server.jar"
 
         ssh nerch@$SERVER "sudo systemctl restart nerch"
