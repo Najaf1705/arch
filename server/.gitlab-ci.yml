@@ -63,11 +63,11 @@ deploy:
 
         $SCP_CMD "$JAR_FILE" nerch@$SERVER:/opt/nerch/server.jar
 
-        $SSH_CMD nerch@$SERVER "sudo systemctl restart nerch"
+        $SSH_CMD nerch@$SERVER "sudo -n systemctl restart nerch"
       
         sleep 10
 
-        if $SSH_CMD nerch@$SERVER "sudo systemctl is-active --quiet nerch"; then
+        if $SSH_CMD nerch@$SERVER "sudo -n systemctl is-active --quiet nerch"; then
           echo "Deployment successful on $SERVER"
         else
           echo "Deployment failed — rollback"
