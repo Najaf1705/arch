@@ -7,8 +7,6 @@ stages:
 # -------------------------
 build:
   stage: build
-  tags:
-    - nerchRunner
 
   script:
     - cd server
