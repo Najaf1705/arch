@@ -3,42 +3,32 @@ stages:
   - deploy
 
 # -------------------------
-# BUILD STAGE
+# BUILD STAGE (Docker runner)
 # -------------------------
 build:
-  tags:
-    - nerchRunner
   stage: build
+  tags:
+    - docker-build          # your docker runner tag
   image: maven:3.9-eclipse-temurin-21
+
   script:
     - cd server
     - mvn clean package -DskipTests
+
   artifacts:
     paths:
       - server/target/*.jar
     expire_in: 1 day
 
 # -------------------------
-# DEPLOY STAGE
+# DEPLOY STAGE (Shell runner)
 # -------------------------
 deploy:
+  stage: deploy
   tags:
     - nerchRunner
-  stage: deploy
-  image: alpine:latest
-
-  before_script:
-    - apk add --no-cache openssh curl iproute2
-
-    # SSH setup
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-
-    # Write private key
-    #- printf "%s" "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/gitlab_key
-    - echo "SSH Key $SSH_PRIVATE_KEY"
-    - echo "$SSH_PRIVATE_KEY" | sed 's/\r$//' > ~/.ssh/gitlab_key
-    - chmod 600 ~/.ssh/gitlab_key
+  needs:
+    - build
 
   script:
     - |
@@ -52,16 +42,15 @@ deploy:
         exit 1
       fi
 
+      SSH_KEY="/home/ec2-user/.ssh/gitlab_key"
       TIMESTAMP=$(date +%d%m%Y_%H%M%S)
-
-      echo "Artifacts available:"
-      ls -lah server/target/
+      JAR_FILE=$(ls server/target/*.jar | head -n 1)
 
       for SERVER in $DEPLOY_SERVERS; do
-        echo "Deploying to $SERVER ..."
+        echo "Deploying to nerch@$SERVER ..."
 
-        # Backup current jar
-        ssh -vvv -i ~/.ssh/gitlab_key \
+        # Backup existing jar
+        ssh -i $SSH_KEY \
             -o StrictHostKeyChecking=no \
             nerch@$SERVER "
               BACKUP=/opt/nerch/server_${TIMESTAMP}.jar
@@ -73,30 +62,25 @@ deploy:
             "
 
         # Copy new jar
-        scp -i ~/.ssh/gitlab_key \
+        scp -i $SSH_KEY \
             -o StrictHostKeyChecking=no \
-            server/target/*.jar \
+            "$JAR_FILE" \
             nerch@$SERVER:/opt/nerch/server.jar
 
-        # Verify updated file
-        ssh -i ~/.ssh/gitlab_key \
-            -o StrictHostKeyChecking=no \
-            nerch@$SERVER "ls -lh /opt/nerch/server.jar"
-
         # Restart service
-        ssh -i ~/.ssh/gitlab_key \
+        ssh -i $SSH_KEY \
             -o StrictHostKeyChecking=no \
             nerch@$SERVER "sudo systemctl restart nerch"
 
-        # Health check + rollback
-        if ssh -i ~/.ssh/gitlab_key \
+        # Health check
+        if ssh -i $SSH_KEY \
               -o StrictHostKeyChecking=no \
               nerch@$SERVER "sudo systemctl is-active --quiet nerch"; then
           echo "Deployment successful on $SERVER"
         else
           echo "Deployment failed — rollback"
 
-          ssh -i ~/.ssh/gitlab_key \
+          ssh -i $SSH_KEY \
               -o StrictHostKeyChecking=no \
               nerch@$SERVER "
                 mv /opt/nerch/server.jar /opt/nerch/server_failed_${TIMESTAMP}.jar
