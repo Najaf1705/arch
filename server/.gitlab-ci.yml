@@ -3,10 +3,13 @@ stages:
   - deploy
 
 # -------------------------
-# BUILD STAGE (Shell runner)
+# BUILD STAGE (Docker runner)
 # -------------------------
 build:
   stage: build
+
+  # your docker runner tag
+  image: maven:3.9-eclipse-temurin-21
 
   script:
     - cd server
@@ -18,7 +21,7 @@ build:
     expire_in: 1 day
 
 # -------------------------
-# DEPLOY STAGE
+# DEPLOY STAGE (Shell runner)
 # -------------------------
 deploy:
   stage: deploy
