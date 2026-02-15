@@ -35,7 +35,8 @@ deploy:
     - chmod 700 ~/.ssh
 
     # Write private key
-    - printf "%s" "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/gitlab_key
+    - #printf "%s" "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/gitlab_key
+    - echo "$SSH_PRIVATE_KEY" | sed 's/\r$//' > ~/.ssh/gitlab_key
     - chmod 600 ~/.ssh/gitlab_key
 
   script:
