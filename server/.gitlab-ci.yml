@@ -30,12 +30,17 @@ deploy:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
 
-    # Write private key safely
+    # Private key from GitLab variable
     - printf "%s" "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/gitlab_key
     - chmod 600 ~/.ssh/gitlab_key
 
-    # Optional but convenient
-    - echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+    # SSH config (always use this key)
+    - |
+      cat > ~/.ssh/config <<EOF
+      Host *
+        IdentityFile ~/.ssh/gitlab_key
+        StrictHostKeyChecking no
+      EOF
 
   script:
     - |
@@ -45,14 +50,26 @@ deploy:
       echo "Public IP: $(curl -s ifconfig.me)"
       ip addr || true
 
-      TIMESTAMP=$(date +%d%m%Y_%H%M%S)
-#      SERVERS="$DEPLOY_SERVERS"
+      echo "DEPLOY_SERVERS = [$DEPLOY_SERVERS]"
 
+      # Fail fast if servers not provided
+      if [ -z "$DEPLOY_SERVERS" ]; then
+        echo "ERROR: DEPLOY_SERVERS is empty"
+        exit 1
+      fi
+
+      TIMESTAMP=$(date +%d%m%Y_%H%M%S)
+
+      echo "Artifacts available:"
+      ls -lah server/target/
+
+      # Add hosts
       for SERVER in $DEPLOY_SERVERS; do
         ssh-keyscan -H $SERVER >> ~/.ssh/known_hosts || true
       done
 
-      for SERVER in $SERVERS; do
+      # Deployment loop
+      for SERVER in $DEPLOY_SERVERS; do
         echo "Deploying to $SERVER ..."
 
         ssh nerch@$SERVER "
@@ -66,10 +83,13 @@ deploy:
 
         scp server/target/*.jar nerch@$SERVER:/opt/nerch/server.jar
 
+        # Show updated file info
+        ssh nerch@$SERVER "ls -lh /opt/nerch/server.jar"
+
         ssh nerch@$SERVER "sudo systemctl restart nerch"
 
         if ssh nerch@$SERVER "sudo systemctl is-active --quiet nerch"; then
-          echo "Deployment successful"
+          echo "Deployment successful on $SERVER"
         else
           echo "Deployment failed — rollback"
 
