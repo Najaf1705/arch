@@ -61,7 +61,7 @@ deploy:
         echo "Deploying to $SERVER ..."
 
         # Backup current jar
-        ssh -i ~/.ssh/gitlab_key \
+        ssh -vvv -i ~/.ssh/gitlab_key \
             -o StrictHostKeyChecking=no \
             nerch@$SERVER "
               BACKUP=/opt/nerch/server_${TIMESTAMP}.jar
