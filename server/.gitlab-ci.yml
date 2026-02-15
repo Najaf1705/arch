@@ -61,19 +61,41 @@ deploy:
           fi
         "
 
-        $SCP_CMD "$JAR_FILE" nerch@$SERVER:/opt/nerch/server.jar
+        # -------- Copy new jar --------
+                $SCP_CMD "$JAR_FILE" nerch@$SERVER:/opt/nerch/server.jar
 
-        $SSH_CMD nerch@$SERVER "sudo systemctl restart nerch"
+                # -------- Restart service --------
+                $SSH_CMD nerch@$SERVER "sudo -n systemctl restart nerch"
 
-        if $SSH_CMD nerch@$SERVER "sudo systemctl is-active --quiet nerch"; then
-          echo "Deployment successful on $SERVER"
-        else
-          echo "Deployment failed — rollback"
+                echo "Waiting for service startup..."
 
-          $SSH_CMD nerch@$SERVER "
-            mv /opt/nerch/server.jar /opt/nerch/server_failed_${TIMESTAMP}.jar
-            cp /opt/nerch/server_${TIMESTAMP}.jar /opt/nerch/server.jar
-            sudo systemctl restart nerch
-          "
-        fi
-      done
+                SUCCESS=0
+
+                # -------- Health wait loop --------
+                for i in {1..10}; do
+                  if $SSH_CMD nerch@$SERVER "sudo -n systemctl is-active --quiet nerch"; then
+                    echo "Service healthy (attempt $i)"
+                    SUCCESS=1
+                    break
+                  fi
+
+                  echo "Service not ready yet... retrying ($i/10)"
+                  sleep 3
+                done
+
+                # -------- Success / Rollback --------
+                if [ "$SUCCESS" -eq 1 ]; then
+                  echo "Deployment successful on $SERVER"
+                else
+                  echo "Deployment failed — rollback starting"
+
+                  $SSH_CMD nerch@$SERVER "
+                    mv /opt/nerch/server.jar /opt/nerch/server_failed_${TIMESTAMP}.jar
+                    cp /opt/nerch/server_${TIMESTAMP}.jar /opt/nerch/server.jar
+                    sudo -n systemctl restart nerch
+                  "
+
+                  echo "Rollback completed"
+                  exit 1
+                fi
+              done
