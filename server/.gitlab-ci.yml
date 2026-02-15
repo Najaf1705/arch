@@ -32,9 +32,13 @@ deploy:
 
   script:
     - |
+      set -e  # Exit on any error
+      
       echo "===== RUNNER DETAILS ====="
       echo "Hostname: $(hostname)"
       echo "User: $(whoami)"
+      echo "PWD: $(pwd)"
+      echo "HOME: $HOME"
       echo "DEPLOY_SERVERS = [$DEPLOY_SERVERS]"
 
       if [ -z "$DEPLOY_SERVERS" ]; then
@@ -42,40 +46,46 @@ deploy:
         exit 1
       fi
 
-      SSH_KEY="/home/gitlab-runner/.ssh/gitlab_key"
+      # Use absolute path
+      SSH_KEY="$HOME/.ssh/gitlab_key"
+      
+      if [ ! -f "$SSH_KEY" ]; then
+        echo "ERROR: SSH key not found at $SSH_KEY"
+        exit 1
+      fi
+      
+      echo "SSH key: $SSH_KEY (permissions: $(stat -c '%a' $SSH_KEY))"
+      
       TIMESTAMP=$(date +%d%m%Y_%H%M%S)
       JAR_FILE=$(ls server/target/*.jar | head -n 1)
+      
+      if [ -z "$JAR_FILE" ]; then
+        echo "ERROR: No JAR file found"
+        exit 1
+      fi
+      
+      echo "JAR file: $JAR_FILE"
 
-      SSH_CMD="ssh -i $SSH_KEY -o StrictHostKeyChecking=no"
-      SCP_CMD="scp -i $SSH_KEY -o StrictHostKeyChecking=no"
+      SSH_CMD="ssh -i $SSH_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+      SCP_CMD="scp -i $SSH_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
       for SERVER in $DEPLOY_SERVERS; do
-        echo "Deploying to nerch@$SERVER ..."
-
-        $SSH_CMD nerch@$SERVER "
-          BACKUP=/opt/nerch/server_${TIMESTAMP}.jar
-          CURRENT=/opt/nerch/server.jar
-
-          if [ -f \$CURRENT ]; then
-            cp \$CURRENT \$BACKUP
-          fi
-        "
-
-        $SCP_CMD "$JAR_FILE" nerch@$SERVER:/opt/nerch/server.jar
-
-        $SSH_CMD nerch@$SERVER "sudo -n systemctl restart nerch"
+        echo ""
+        echo "===== Deploying to nerch@$SERVER ====="
       
-        sleep 10
-
-        if $SSH_CMD nerch@$SERVER "sudo -n systemctl is-active --quiet nerch"; then
-          echo "Deployment successful on $SERVER"
-        else
-          echo "Deployment failed — rollback"
-
-          $SSH_CMD nerch@$SERVER "
-            mv /opt/nerch/server.jar /opt/nerch/server_failed_${TIMESTAMP}.jar
-            cp /opt/nerch/server_${TIMESTAMP}.jar /opt/nerch/server.jar
-            sudo systemctl restart nerch
-          "
+        # Test connection
+        echo "→ Testing SSH connection..."
+        if ! $SSH_CMD nerch@$SERVER "echo 'Connected as:' && whoami"; then
+          echo "ERROR: SSH connection failed"
+          exit 1
         fi
-      done
+      
+        # Test sudo
+        echo "→ Testing sudo permissions..."
+        if ! $SSH_CMD nerch@$SERVER "sudo -n systemctl is-active nerch"; then
+          echo "ERROR: Sudo test failed"
+          exit 1
+        fi
+
+        # Backup existing JAR
+        echo "→ Creati
