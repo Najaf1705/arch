@@ -88,4 +88,53 @@ deploy:
         fi
 
         # Backup existing JAR
-        echo "→ Creati
+        echo "→ Creating backup..."
+        $SSH_CMD nerch@$SERVER "
+          BACKUP=/opt/nerch/server_${TIMESTAMP}.jar
+          CURRENT=/opt/nerch/server.jar
+          if [ -f \$CURRENT ]; then
+            cp \$CURRENT \$BACKUP
+            echo 'Backup created: \$BACKUP'
+          else
+            echo 'No existing JAR to backup'
+          fi
+        "
+
+        # Copy new JAR
+        echo "→ Copying new JAR..."
+        $SCP_CMD "$JAR_FILE" nerch@$SERVER:/opt/nerch/server.jar
+
+        # Restart service
+        echo "→ Restarting service..."
+        $SSH_CMD nerch@$SERVER "sudo -n systemctl restart nerch"
+      
+        echo "→ Waiting 10 seconds for service to start..."
+        sleep 10
+
+        # Check if service is running
+        echo "→ Verifying service status..."
+        if $SSH_CMD nerch@$SERVER "sudo -n systemctl is-active --quiet nerch"; then
+          echo "✓ Deployment successful on $SERVER"
+          $SSH_CMD nerch@$SERVER "sudo -n systemctl status nerch --no-pager -l"
+        else
+          echo "✗ Service failed to start — initiating rollback"
+      
+          $SSH_CMD nerch@$SERVER "
+            echo 'Moving failed JAR...'
+            mv /opt/nerch/server.jar /opt/nerch/server_failed_${TIMESTAMP}.jar
+      
+            echo 'Restoring backup...'
+            cp /opt/nerch/server_${TIMESTAMP}.jar /opt/nerch/server.jar
+      
+            echo 'Restarting service...'
+            sudo -n systemctl restart nerch
+      
+            echo 'Rollback complete. Service status:'
+            sudo -n systemctl status nerch --no-pager
+          "
+          exit 1
+        fi
+      done
+      
+      echo ""
+      echo "===== DEPLOYMENT COMPLETE ====="
