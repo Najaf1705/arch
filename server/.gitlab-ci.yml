@@ -37,9 +37,6 @@ deploy:
     # Optional but convenient
     - echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
-  variables:
-    DEPLOY_SERVERS: ""
-
   script:
     - |
       echo "===== RUNNER DETAILS ====="
@@ -49,9 +46,9 @@ deploy:
       ip addr || true
 
       TIMESTAMP=$(date +%d%m%Y_%H%M%S)
-      SERVERS="$DEPLOY_SERVERS"
+#      SERVERS="$DEPLOY_SERVERS"
 
-      for SERVER in $SERVERS; do
+      for SERVER in $DEPLOY_SERVERS; do
         ssh-keyscan -H $SERVER >> ~/.ssh/known_hosts || true
       done
 
