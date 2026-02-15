@@ -30,30 +30,17 @@ deploy:
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
 
-    # Private key from GitLab variable
+    # Write private key
     - printf "%s" "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/gitlab_key
     - chmod 600 ~/.ssh/gitlab_key
-
-    # Force SSH to use gitlab_key
-    - |
-      cat > ~/.ssh/config <<EOF
-      Host *
-        IdentityFile ~/.ssh/gitlab_key
-        IdentitiesOnly yes
-        StrictHostKeyChecking no
-      EOF
 
   script:
     - |
       echo "===== RUNNER DETAILS ====="
       echo "Hostname: $(hostname)"
       echo "User: $(whoami)"
-      echo "Public IP: $(curl -s ifconfig.me)"
-      ip addr || true
-
       echo "DEPLOY_SERVERS = [$DEPLOY_SERVERS]"
 
-      # Fail if no servers provided
       if [ -z "$DEPLOY_SERVERS" ]; then
         echo "ERROR: DEPLOY_SERVERS is empty"
         exit 1
@@ -64,40 +51,51 @@ deploy:
       echo "Artifacts available:"
       ls -lah server/target/
 
-      # Add hosts to known_hosts
-      for SERVER in $DEPLOY_SERVERS; do
-        ssh-keyscan -H $SERVER >> ~/.ssh/known_hosts || true
-      done
-
-      # Deployment loop
       for SERVER in $DEPLOY_SERVERS; do
         echo "Deploying to $SERVER ..."
 
-        ssh nerch@$SERVER "
-          BACKUP=/opt/nerch/server_${TIMESTAMP}.jar
-          CURRENT=/opt/nerch/server.jar
+        # Backup current jar
+        ssh -i ~/.ssh/gitlab_key \
+            -o StrictHostKeyChecking=no \
+            nerch@$SERVER "
+              BACKUP=/opt/nerch/server_${TIMESTAMP}.jar
+              CURRENT=/opt/nerch/server.jar
 
-          if [ -f \$CURRENT ]; then
-            cp \$CURRENT \$BACKUP
-          fi
-        "
+              if [ -f \$CURRENT ]; then
+                cp \$CURRENT \$BACKUP
+              fi
+            "
 
-        scp server/target/*.jar nerch@$SERVER:/opt/nerch/server.jar
+        # Copy new jar
+        scp -i ~/.ssh/gitlab_key \
+            -o StrictHostKeyChecking=no \
+            server/target/*.jar \
+            nerch@$SERVER:/opt/nerch/server.jar
 
-        # Show remote file (proof of update)
-        ssh nerch@$SERVER "ls -lh /opt/nerch/server.jar"
+        # Verify updated file
+        ssh -i ~/.ssh/gitlab_key \
+            -o StrictHostKeyChecking=no \
+            nerch@$SERVER "ls -lh /opt/nerch/server.jar"
 
-        ssh nerch@$SERVER "sudo systemctl restart nerch"
+        # Restart service
+        ssh -i ~/.ssh/gitlab_key \
+            -o StrictHostKeyChecking=no \
+            nerch@$SERVER "sudo systemctl restart nerch"
 
-        if ssh nerch@$SERVER "sudo systemctl is-active --quiet nerch"; then
+        # Health check + rollback
+        if ssh -i ~/.ssh/gitlab_key \
+              -o StrictHostKeyChecking=no \
+              nerch@$SERVER "sudo systemctl is-active --quiet nerch"; then
           echo "Deployment successful on $SERVER"
         else
           echo "Deployment failed — rollback"
 
-          ssh nerch@$SERVER "
-            mv /opt/nerch/server.jar /opt/nerch/server_failed_${TIMESTAMP}.jar
-            cp /opt/nerch/server_${TIMESTAMP}.jar /opt/nerch/server.jar
-            sudo systemctl restart nerch
-          "
+          ssh -i ~/.ssh/gitlab_key \
+              -o StrictHostKeyChecking=no \
+              nerch@$SERVER "
+                mv /opt/nerch/server.jar /opt/nerch/server_failed_${TIMESTAMP}.jar
+                cp /opt/nerch/server_${TIMESTAMP}.jar /opt/nerch/server.jar
+                sudo systemctl restart nerch
+              "
         fi
       done
