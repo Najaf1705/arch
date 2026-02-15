@@ -3,13 +3,12 @@ stages:
   - deploy
 
 # -------------------------
-# BUILD STAGE (Docker runner)
+# BUILD STAGE (Shell runner)
 # -------------------------
 build:
   stage: build
-
-  # your docker runner tag
-  image: maven:3.9-eclipse-temurin-21
+  tags:
+    - nerchRunner
 
   script:
     - cd server
@@ -21,7 +20,7 @@ build:
     expire_in: 1 day
 
 # -------------------------
-# DEPLOY STAGE (Shell runner)
+# DEPLOY STAGE
 # -------------------------
 deploy:
   stage: deploy
@@ -42,50 +41,38 @@ deploy:
         exit 1
       fi
 
-      SSH_KEY="/home/ec2-user/.ssh/gitlab_key"
+      SSH_KEY="/home/gitlab-runner/.ssh/gitlab_key"
       TIMESTAMP=$(date +%d%m%Y_%H%M%S)
       JAR_FILE=$(ls server/target/*.jar | head -n 1)
+
+      SSH_CMD="ssh -i $SSH_KEY -o StrictHostKeyChecking=no"
+      SCP_CMD="scp -i $SSH_KEY -o StrictHostKeyChecking=no"
 
       for SERVER in $DEPLOY_SERVERS; do
         echo "Deploying to nerch@$SERVER ..."
 
-        # Backup existing jar
-        ssh -i $SSH_KEY \
-            -o StrictHostKeyChecking=no \
-            nerch@$SERVER "
-              BACKUP=/opt/nerch/server_${TIMESTAMP}.jar
-              CURRENT=/opt/nerch/server.jar
+        $SSH_CMD nerch@$SERVER "
+          BACKUP=/opt/nerch/server_${TIMESTAMP}.jar
+          CURRENT=/opt/nerch/server.jar
 
-              if [ -f \$CURRENT ]; then
-                cp \$CURRENT \$BACKUP
-              fi
-            "
+          if [ -f \$CURRENT ]; then
+            cp \$CURRENT \$BACKUP
+          fi
+        "
 
-        # Copy new jar
-        scp -i $SSH_KEY \
-            -o StrictHostKeyChecking=no \
-            "$JAR_FILE" \
-            nerch@$SERVER:/opt/nerch/server.jar
+        $SCP_CMD "$JAR_FILE" nerch@$SERVER:/opt/nerch/server.jar
 
-        # Restart service
-        ssh -i $SSH_KEY \
-            -o StrictHostKeyChecking=no \
-            nerch@$SERVER "sudo systemctl restart nerch"
+        $SSH_CMD nerch@$SERVER "sudo systemctl restart nerch"
 
-        # Health check
-        if ssh -i $SSH_KEY \
-              -o StrictHostKeyChecking=no \
-              nerch@$SERVER "sudo systemctl is-active --quiet nerch"; then
+        if $SSH_CMD nerch@$SERVER "sudo systemctl is-active --quiet nerch"; then
           echo "Deployment successful on $SERVER"
         else
           echo "Deployment failed — rollback"
 
-          ssh -i $SSH_KEY \
-              -o StrictHostKeyChecking=no \
-              nerch@$SERVER "
-                mv /opt/nerch/server.jar /opt/nerch/server_failed_${TIMESTAMP}.jar
-                cp /opt/nerch/server_${TIMESTAMP}.jar /opt/nerch/server.jar
-                sudo systemctl restart nerch
-              "
+          $SSH_CMD nerch@$SERVER "
+            mv /opt/nerch/server.jar /opt/nerch/server_failed_${TIMESTAMP}.jar
+            cp /opt/nerch/server_${TIMESTAMP}.jar /opt/nerch/server.jar
+            sudo systemctl restart nerch
+          "
         fi
       done
