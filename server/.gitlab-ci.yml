@@ -7,6 +7,7 @@ stages:
 # -------------------------
 build:
   stage: build
+  image: maven:3.9-eclipse-temurin-21
   script:
     - cd server
     - mvn clean package -DskipTests
@@ -20,41 +21,40 @@ build:
 # -------------------------
 deploy:
   stage: deploy
-
-  variables:
-    DEPLOY_SERVERS: ""
+  image: alpine:latest
 
   before_script:
-    # Ensure SSH dir exists for runner user
+    - apk add --no-cache openssh curl iproute2
+
+    # SSH setup
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
 
-    # Optional: avoid host key prompts
+    # Write private key safely
+    - printf "%s" "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/gitlab_key
+    - chmod 600 ~/.ssh/gitlab_key
+
+    # Optional but convenient
     - echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
-    # Load key (only needed if key is not default name)
-    # If your key is ~/.ssh/id_ed25519 you can REMOVE this line
-    - eval $(ssh-agent -s)
-    - ssh-add ~/.ssh/id_ed25519
+  variables:
+    DEPLOY_SERVERS: ""
 
   script:
     - |
       echo "===== RUNNER DETAILS ====="
       echo "Hostname: $(hostname)"
       echo "User: $(whoami)"
-      echo "Home: $HOME"
       echo "Public IP: $(curl -s ifconfig.me)"
       ip addr || true
 
       TIMESTAMP=$(date +%d%m%Y_%H%M%S)
       SERVERS="$DEPLOY_SERVERS"
 
-      # Populate known_hosts (optional)
       for SERVER in $SERVERS; do
         ssh-keyscan -H $SERVER >> ~/.ssh/known_hosts || true
       done
 
-      # Deployment loop
       for SERVER in $SERVERS; do
         echo "Deploying to $SERVER ..."
 
