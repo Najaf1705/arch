@@ -87,6 +87,7 @@ export default function NodeSidebar({
           bg-c1 text-foreground
           border-l border-border
           z-20
+          pt-10
           flex flex-col
         "
       >

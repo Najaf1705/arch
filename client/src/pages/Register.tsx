@@ -218,6 +218,7 @@ export default function Register() {
           Already have an account?{" "}
           <Link
             to="/login"
+            replace={true}
             className="text-primary underline"
           >
             Login

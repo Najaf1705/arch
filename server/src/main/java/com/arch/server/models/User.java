@@ -1,5 +1,6 @@
 package com.arch.server.models;
 
+import com.arch.server.models.Graph.Graph;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -46,4 +47,5 @@ public class User {
     private Role role;
 
     private List<String> graphs;
+    private List<Graph> graphsDetail;
 }

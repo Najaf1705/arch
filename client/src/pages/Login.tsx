@@ -222,7 +222,7 @@ export default function Login() {
 
           <p className="text-sm text-center mt-4 text-muted-foreground">
             Don’t have an account?{" "}
-            <Link to="/register" className="text-primary underline">
+            <Link to="/register" replace={true} className="text-primary underline">
               Register
             </Link>
           </p>

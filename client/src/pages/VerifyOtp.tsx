@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, replace, useLocation, useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../redux/hooks";
 import {
   fetchMe,
@@ -107,19 +107,25 @@ export default function VerifyOtp() {
         thunk({
           otpRequestId,
           otp: otp.join(""),
-          email
+          email,
         })
       ).unwrap();
 
+      // Only runs if OTP verified successfully
       await dispatch(fetchMe()).unwrap();
-      navigate("/profile");
+      navigate("/profile", {replace:true});
 
-    } catch {
-      setError("Invalid or expired OTP");
+    } catch (err: any) {
+      if (err === "USER_NOT_FOUND") {
+        setError("USER_NOT_FOUND");
+      } else {
+        setError("Invalid or expired OTP");
+      }
     } finally {
       setLoading(false);
     }
   };
+
 
   /* ---------- RESEND ---------- */
 
@@ -198,9 +204,19 @@ export default function VerifyOtp() {
               className="text-sm text-center mb-3"
               style={{ color: "rgb(var(--c10))" }}
             >
-              {error}
+              {error === "USER_NOT_FOUND" ? (
+                <>
+                  User not found, go to{" "}
+                  <Link to="/register" replace={true} className="underline">
+                    Register
+                  </Link>
+                </>
+              ) : (
+                "Invalid OTP"
+              )}
             </p>
           )}
+
 
           <button
             onClick={submitOtp}

@@ -86,33 +86,14 @@ export const googleLoginThunk = createAsyncThunk(
 );
 
 
-export const verifyRegisterOtpThunk=createAsyncThunk(
+export const verifyRegisterOtpThunk = createAsyncThunk<
+  void,
+  { otpRequestId: string; otp: string; email: string },
+  { rejectValue: "USER_NOT_FOUND" | "INVALID_OTP" }
+>(
   "auth/otpVerify",
-  async ({ otpRequestId, otp, email }: {otpRequestId:string, otp:string, email:string}, {rejectWithValue}) => {
-    const res=await fetch(
-      `${import.meta.env.VITE_APP_BACKEND_URL}/auth/register/verify-otp`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ otpRequestId, otp, email }),
-      }
-    )
-    
-    if(res.status===200){
-      return {
-        validOtp: true
-      }
-    }
-
-    return rejectWithValue("Invalid OTP");
-  }
-)
-
-export const verifyLoginOtpThunk=createAsyncThunk(
-  "auth/otpVerify",
-  async ({ otpRequestId, otp, email }: {otpRequestId:string, otp:string, email:string}, {rejectWithValue}) => {
-    const res=await fetch(
+  async ({ otpRequestId, otp, email }, { rejectWithValue }) => {
+    const res = await fetch(
       `${import.meta.env.VITE_APP_BACKEND_URL}/auth/login/verify-otp`,
       {
         method: "POST",
@@ -120,17 +101,52 @@ export const verifyLoginOtpThunk=createAsyncThunk(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ otpRequestId, otp, email }),
       }
-    )
-    
-    if(res.status===200){
-      return {
-        validOtp: true
-      }
+    );
+
+    if (res.status === 200) {
+      return;
     }
 
-    return rejectWithValue("Invalid OTP");
+    if (res.status === 404) {
+      return rejectWithValue("USER_NOT_FOUND");
+    }
+
+    return rejectWithValue("INVALID_OTP");
   }
-)
+);
+
+
+
+export const verifyLoginOtpThunk = createAsyncThunk<
+  void,
+  { otpRequestId: string; otp: string; email: string },
+  { rejectValue: "USER_NOT_FOUND" | "INVALID_OTP" }
+>(
+  "auth/otpVerify",
+  async ({ otpRequestId, otp, email }, { rejectWithValue }) => {
+    const res = await fetch(
+      `${import.meta.env.VITE_APP_BACKEND_URL}/auth/login/verify-otp`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ otpRequestId, otp, email }),
+      }
+    );
+
+    if (res.status === 200) {
+      return;
+    }
+
+    if (res.status === 404) {
+      return rejectWithValue("USER_NOT_FOUND");
+    }
+
+    return rejectWithValue("INVALID_OTP");
+  }
+);
+
+
 
 export const regenerateOtpThunk=createAsyncThunk(
   "auth/regenerateOtp",

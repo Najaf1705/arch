@@ -40,8 +40,14 @@ public class LoginServices {
         OtpVerificationResult result = otpService.verifyOtp(req);
 
         if (!result.isVerified()) {
-            throw new RuntimeException(result.getMessage());
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    result.getMessage()
+            );
         }
+
+        System.out.println("otp verified");
+
 
         return userRepository
                 .findByEmail(req.getEmail())
