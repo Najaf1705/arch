@@ -16,7 +16,9 @@ public class CorsConfig {
                 registry.addMapping("/**")
                         .allowedOrigins(
                                 "http://localhost:5173",   // dev
-                                "https://nerch.vercel.app" // prod
+                                "http://localhost:4173",   // dev
+                                "https://nerch.vercel.app", // prod
+                                "https://nerch.najaf.in" // prod
                         )
                         .allowedMethods("*")
                         .allowedHeaders("*")
