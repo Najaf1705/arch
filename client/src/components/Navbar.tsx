@@ -66,7 +66,7 @@ export default function Navbar() {
               <button
                 key={p.label}
                 className="hover:text-green-400 transition"
-                onClick={() => navigate(p.path)}
+                onClick={() => navigate(p.path, {replace: true})}
               >
                 {p.label}
               </button>

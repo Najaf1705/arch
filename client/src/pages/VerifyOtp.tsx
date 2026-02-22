@@ -112,7 +112,7 @@ export default function VerifyOtp() {
       ).unwrap();
 
       await dispatch(fetchMe()).unwrap();
-      navigate("/profile");
+      navigate("/profile", {replace: true});
 
     } catch {
       setError("Invalid or expired OTP");

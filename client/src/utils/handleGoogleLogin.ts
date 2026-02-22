@@ -25,12 +25,13 @@ export async function handleGoogleLogin(
 
     if (result.status === "EXISTS") {
       await dispatch(fetchMe()).unwrap();
-      navigate("/profile");
+      navigate("/profile", {replace: true});
       return;
     }
 
     if (result.status === "NEW_USER") {
-      navigate("/setPass", {
+      navigate("/set-password", {
+        replace: true,
         state: {
           idToken: cred.credential,
           email: result.email,

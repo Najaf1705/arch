@@ -53,6 +53,7 @@ export default function GoogleLoginButton() {
 
     // 🆕 NEW USER → go to password page
     navigate("/set-password", {
+      replace: true,
       state: {
         idToken: response.credential,
       },

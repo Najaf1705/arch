@@ -59,7 +59,7 @@ export default function SetPassword() {
       const res = await dispatch(googleLoginThunk({idToken,password})).unwrap();
 
       await dispatch(fetchMe()).unwrap();
-      navigate("/profile");
+      navigate("/profile", {replace: true});
 
     } catch {
       setError("Could not complete signup");

@@ -44,7 +44,7 @@ function HomeNode() {
 
   return (
     <div
-      onClick={() => navigate("/")}
+      onClick={() => navigate("/", {replace: true})}
       className="cursor-pointer bg-pink-500 text-white font-semibold px-4 py-2 rounded-xl hover:opacity-90 transition"
     >
       Go Home →

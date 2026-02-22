@@ -1,5 +1,6 @@
 import React from "react";
 import EgFlow from "../components/home/EgFlow";
+import Footer from "../components/Footer";
 
 export default function Home() {
   return (
@@ -97,6 +98,9 @@ export default function Home() {
         <div>ads</div>
         <div>ads</div>
       </section> */}
+      <section>
+        <Footer/>
+      </section>
 
       
     </div>

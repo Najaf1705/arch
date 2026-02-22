@@ -86,6 +86,7 @@ export default function Login() {
       ).unwrap();
 
       navigate("/verify-otp", {
+        replace: true,
         state: {
           type: "login",
           otpRequestId: res.otpRequestId,

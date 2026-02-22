@@ -74,6 +74,7 @@ export default function Register() {
       ).unwrap();
 
       navigate("/verify-otp", {
+        replace: true,
         state: {
           type: "register",
           email: cleanEmail,
