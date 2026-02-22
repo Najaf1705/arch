@@ -17,7 +17,7 @@ public class JwtUtil {
     private final SecretKey key;
     private final long EXP = 1000 * 60 * 60;
 
-    public JwtUtil(@Value("${BASE64_SEC}") String base64Secret) {
+    public JwtUtil(@Value("${JWT_SECRET}") String base64Secret) {
         System.out.println("JWT SECRET PRESENT = " + (base64Secret != null));
         this.key = Keys.hmacShaKeyFor(
                 Decoders.BASE64.decode(base64Secret)
