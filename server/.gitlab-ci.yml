@@ -65,8 +65,15 @@ deploy:
   
         $SCP_CMD "$JAR_FILE" nerch@$SERVER:/opt/nerch/server.jar
   
-        $SSH_CMD nerch@$SERVER "printf 'SPRING_PROFILES_ACTIVE=prod\nMONGO_URI=${MONGO_URI}\nMAIL_USERNAME=${MAIL_USERNAME}\nMAIL_PASSWORD=${MAIL_PASSWORD}\nJWT_SECRET=${JWT_SECRET}\nCORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}\n' > /opt/nerch/.env && chmod 600 /opt/nerch/.env"
-  
+        $SSH_CMD nerch@$SERVER "cat > /opt/nerch/.env << 'ENVEOF'
+          SPRING_PROFILES_ACTIVE=prod
+          MONGO_URI=${MONGO_URI}
+          MAIL_USERNAME=${MAIL_USERNAME}
+          MAIL_PASSWORD=${MAIL_PASSWORD}
+          JWT_SECRET=${JWT_SECRET}
+          CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+          ENVEOF
+          chmod 600 /opt/nerch/.env"  
         $SSH_CMD nerch@$SERVER "sudo -n systemctl restart nerch"
   
         echo "✓ Deployment complete on $SERVER"
