@@ -1,11 +1,8 @@
 // authSlice.ts
 import { createSlice } from "@reduxjs/toolkit";
 import { fetchMe } from "./authThunks";
+import type { AuthState } from "../../types/AuthState";
 
-type AuthState = {
-  user: any | null;
-  status: "idle" | "loading" | "authenticated" | "unauthenticated";
-};
 
 const initialState: AuthState = {
   user: null,

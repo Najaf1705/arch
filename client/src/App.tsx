@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 
 import PublicOnlyRoute from "./routing/PublicOnlyRoute";
 import Navbar from "./components/Navbar";
+import GoogleOneTap from "./components/GoogleOneTapLogin";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -25,6 +26,7 @@ function App() {
 
   return (
     <BrowserRouter>
+    <GoogleOneTap />
       <div className="flex flex-col min-h-screen">
         <Navbar />
 

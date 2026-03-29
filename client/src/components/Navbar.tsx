@@ -26,6 +26,7 @@ export default function Navbar() {
 
   /* SCROLL LOGIC */
   useEffect(() => {
+    if(authenticationStatus!=="unauthenticated")return;
     const onScroll = () => {
       const currentY = window.scrollY;
       const delta = currentY - lastScrollY.current;
